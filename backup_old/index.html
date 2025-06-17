@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>입실초등학교 희망도서 신청시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50">
+    <!-- 헤더 -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-book text-3xl"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold">입실초등학교</h1>
+                        <p class="text-blue-100">희망도서 신청시스템</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="pages/admin.html" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-cog mr-2"></i>관리자
+                    </a>
+                    <a href="pages/requests.html" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-list mr-2"></i>신청현황
+                    </a>
+                    <a href="pages/class-view.html" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition">
+                        <i class="fas fa-school mr-2"></i>학급별현황
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 학급 정보 입력 섹션 -->
+    <section id="class-info-section" class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-wrap items-center gap-4">
+                <div class="flex items-center space-x-4">
+                    <label class="text-gray-700 font-medium">학년:</label>
+                    <select id="grade-select" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">선택하세요</option>
+                        <option value="1">1학년</option>
+                        <option value="2">2학년</option>
+                        <option value="3">3학년</option>
+                        <option value="4">4학년</option>
+                        <option value="5">5학년</option>
+                        <option value="6">6학년</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label class="text-gray-700 font-medium">반:</label>
+                    <select id="class-select" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">선택하세요</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label class="text-gray-700 font-medium">담임교사:</label>
+                    <input type="text" id="teacher-input" placeholder="담임교사 성함을 입력하세요" 
+                           class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div id="budget-info" class="text-sm text-gray-600 hidden">
+                        <span>예산: </span><span id="budget-amount" class="font-semibold text-blue-600"></span>
+                        <span class="mx-2">|</span>
+                        <span>사용: </span><span id="used-amount" class="font-semibold text-red-600"></span>
+                        <span class="mx-2">|</span>
+                        <span>잔여: </span><span id="remaining-amount" class="font-semibold text-green-600"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- 사이드바 (카테고리) -->
+            <aside class="lg:w-1/4">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">도서 카테고리</h2>
+                    <ul class="space-y-2" id="category-list">
+                        <li class="category-item active px-4 py-2 rounded-lg cursor-pointer" data-category="popular">
+                            <i class="fas fa-star mr-2"></i>인기도서
+                        </li>
+                        <li class="category-item px-4 py-2 rounded-lg cursor-pointer" data-category="new">
+                            <i class="fas fa-sparkles mr-2"></i>신간도서
+                        </li>
+                        <li class="category-item px-4 py-2 rounded-lg cursor-pointer" data-category="children">
+                            <i class="fas fa-child mr-2"></i>어린이
+                        </li>
+                        <li class="category-item px-4 py-2 rounded-lg cursor-pointer" data-category="comic">
+                            <i class="fas fa-laugh mr-2"></i>만화
+                        </li>
+                        <li class="category-item px-4 py-2 rounded-lg cursor-pointer" data-category="science">
+                            <i class="fas fa-flask mr-2"></i>과학
+                        </li>
+                        <li class="category-item px-4 py-2 rounded-lg cursor-pointer" data-category="history">
+                            <i class="fas fa-landmark mr-2"></i>역사
+                        </li>
+                        <li class="category-item px-4 py-2 rounded-lg cursor-pointer" data-category="art">
+                            <i class="fas fa-palette mr-2"></i>예술
+                        </li>
+                        <li class="category-item px-4 py-2 rounded-lg cursor-pointer" data-category="language">
+                            <i class="fas fa-language mr-2"></i>외국어
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- 도서 목록 -->
+            <section class="lg:w-3/4">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-gray-800" id="current-category-title">인기도서</h2>
+                        <div class="flex items-center space-x-4">
+                            <div class="relative">
+                                <input type="text" id="search-input" placeholder="도서명, 저자명 검색..." 
+                                       class="border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                            <button id="search-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                                검색
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 로딩 스피너 -->
+                    <div id="loading" class="hidden flex justify-center items-center py-20">
+                        <div class="loading-spinner"></div>
+                        <span class="ml-3 text-gray-600">도서 정보를 불러오는 중...</span>
+                    </div>
+
+                    <!-- 도서 그리드 -->
+                    <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                        <!-- 도서 카드들이 동적으로 생성됩니다 -->
+                    </div>
+
+                    <!-- 페이지네이션 -->
+                    <div id="pagination" class="flex justify-center mt-8">
+                        <!-- 페이지네이션 버튼들이 동적으로 생성됩니다 -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 도서 상세정보 모달 -->
+    <div id="book-detail-modal" class="modal hide fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-90vh overflow-y-auto">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h3 class="text-xl font-semibold text-gray-800">도서 상세정보</h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div id="book-detail-content" class="p-6">
+                <!-- 도서 상세정보가 동적으로 생성됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 알림 토스트 -->
+    <div id="toast" class="fixed top-4 right-4 z-60 hidden">
+        <div class="bg-white rounded-lg shadow-lg border-l-4 p-4 max-w-sm">
+            <div class="flex items-center">
+                <i id="toast-icon" class="text-xl mr-3"></i>
+                <div>
+                    <p id="toast-message" class="text-gray-800 font-medium"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="bg-gray-800 text-white py-6 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-lg font-bold">입실초등학교 희망도서 신청시스템</h3>
+                    <p class="text-gray-400">© 2025 All Rights Reserved</p>
+                </div>
+                <div>
+                    <p class="text-gray-400">문의: library@ipsilschool.edu</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript 모듈 로드 -->
+    <script src="js/utils.js"></script>
+    <script src="js/data-manager.js"></script>
+    <script src="js/api-handler.js"></script>
+    <script src="js/duplicate-checker.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - 교내 희망도서 신청시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 로딩 화면 -->
+    <div id="authLoading" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-blue-500 bg-blue-100">
+                <i class="fas fa-spinner fa-spin mr-2"></i>
+                인증 확인 중...
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div id="mainContent" class="hidden">
+        <!-- 헤더 -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <a href="../index.html" class="flex items-center text-blue-600 hover:text-blue-700">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            <i class="fas fa-cog text-2xl mr-3"></i>
+                            <h1 class="text-xl font-bold text-gray-900">관리자 페이지</h1>
+                        </a>
+                    </div>
+                    <nav class="flex items-center space-x-4">
+                        <a href="../index.html" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-search mr-1"></i>도서검색
+                        </a>
+                        <a href="../applications.html" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-list mr-1"></i>신청목록
+                        </a>
+                        
+                        <!-- 관리자 정보 및 로그아웃 -->
+                        <div class="flex items-center space-x-3 ml-4 pl-4 border-l border-gray-200">
+                            <div class="text-sm text-gray-600">
+                                <i class="fas fa-user mr-1"></i>
+                                <span id="adminEmail">관리자</span>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <i class="fas fa-clock mr-1"></i>
+                                <span id="sessionTimer">--분 남음</span>
+                            </div>
+                            <button id="logoutBtn" class="bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition">
+                                <i class="fas fa-sign-out-alt mr-1"></i>로그아웃
+                            </button>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- 탭 네비게이션 -->
+            <div class="border-b border-gray-200 mb-6">
+                <nav class="-mb-px flex space-x-8">
+                    <button class="tab-btn active border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-tab="overview">
+                        <i class="fas fa-chart-bar mr-2"></i>전체 현황
+                    </button>
+                    <button class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-tab="classes">
+                        <i class="fas fa-users mr-2"></i>학급 관리
+                    </button>
+                    <button class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-tab="class-settings">
+                        <i class="fas fa-cog mr-2"></i>학급 설정
+                    </button>
+                    <button class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-tab="budget">
+                        <i class="fas fa-calculator mr-2"></i>예산 관리
+                    </button>
+                    <button class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-tab="books">
+                        <i class="fas fa-book mr-2"></i>기보유 도서
+                    </button>
+                    <button class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm" data-tab="settings">
+                        <i class="fas fa-tools mr-2"></i>시스템 설정
+                    </button>
+                </nav>
+            </div>
+
+            <!-- 탭 콘텐츠 -->
+            <div class="tab-content">
+                <!-- 전체 현황 탭 -->
+                <div id="overview-tab" class="tab-panel active">
+                    <!-- 전체 신청 도서 목록 -->
+                    <div class="bg-white rounded-lg shadow-sm border mb-8">
+                        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                            <h3 class="text-lg font-medium text-gray-900">전체 신청 도서 목록</h3>
+                            <div class="flex items-center space-x-2">
+                                <div id="allBooksPagination" class="flex items-center space-x-2"></div>
+                                <button id="downloadAllBooksBtn" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm ml-2">
+                                    <i class="fas fa-download mr-1"></i>다운로드
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 admin-table">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-80">도서명</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-48">저자</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">출판사</th>
+                                        <th class="px-6 py-3 text-right text-sm font-medium text-gray-500 uppercase tracking-wider w-10">신청수량</th>
+                                        <th class="px-6 py-3 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">정가</th>
+                                        <th class="px-6 py-3 text-right text-sm font-medium text-gray-500 uppercase tracking-wider">최종가</th>
+                                        <th class="px-6 py-3 text-center text-sm font-medium text-gray-500 uppercase tracking-wider w-6">
+                                            <div class="flex items-center space-x-4 justify-center">
+                                                <select id="gradeFilter" class="border rounded px-2 py-1 text-sm">
+                                                    <option value="">전체</option>
+                                                    <option value="1">1학년</option>
+                                                    <option value="2">2학년</option>
+                                                    <option value="3">3학년</option>
+                                                    <option value="4">4학년</option>
+                                                    <option value="5">5학년</option>
+                                                    <option value="6">6학년</option>
+                                                </select>
+                                                <select id="classFilter" class="border rounded px-2 py-1 text-sm">
+                                                    <option value="">전체</option>
+                                                    <!-- JS에서 동적으로 반 옵션 생성 -->
+                                                </select>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="allApplicationsTable" class="bg-white divide-y divide-gray-200">
+                                    <!-- 동적으로 생성 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- 전체 현황 대시보드 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-lg shadow-sm border">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-blue-100 rounded-lg">
+                                    <i class="fas fa-book text-blue-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">총 신청 도서</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="totalBooks">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-lg shadow-sm border">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-green-100 rounded-lg">
+                                    <i class="fas fa-won-sign text-green-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">총 신청 금액</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="totalAmount">0원</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-lg shadow-sm border">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-purple-100 rounded-lg">
+                                    <i class="fas fa-users text-purple-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">활성 학급</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="activeClasses">0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-lg shadow-sm border">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-orange-100 rounded-lg">
+                                    <i class="fas fa-percentage text-orange-600 text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">평균 예산 사용률</p>
+                                    <p class="text-2xl font-bold text-gray-900" id="avgBudgetUsage">0%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 학급별 현황 -->
+                    <div class="bg-white rounded-lg shadow-sm border mb-8">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">학급별 신청 현황</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 admin-table">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">학급</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">담임교사</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">신청 도서</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">예산 사용</th>
+                                        <th class="px-6 py-3 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">액션</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="classStatsTable" class="bg-white divide-y divide-gray-200">
+                                    <!-- 동적으로 생성 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 최근 신청 도서 -->
+                    <div class="bg-white rounded-lg shadow-sm border">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">최근 신청 도서</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 admin-table">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">도서명</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">저자</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">학급</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">가격</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">신청일</th>
+                                        <th class="px-6 py-3 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">액션</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentApplicationsTable" class="bg-white divide-y divide-gray-200">
+                                    <!-- 동적으로 생성 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 학급 관리 탭 -->
+                <div id="classes-tab" class="tab-panel hidden">
+                    <div class="bg-white rounded-lg shadow-sm border">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">학급별 상세 현황</h3>
+                        </div>
+                        <div class="p-6">
+                            <div id="classDetailsList">
+                                <!-- 동적으로 생성 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 학급 설정 탭 -->
+                <div id="class-settings-tab" class="tab-panel hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- 학급 추가/수정 -->
+                        <div class="bg-white rounded-lg shadow-sm border">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-medium text-gray-900">학급 추가/수정</h3>
+                            </div>
+                            <div class="p-6">
+                                <form id="classForm" class="space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">학년</label>
+                                            <select id="gradeSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <option value="">선택하세요</option>
+                                                <option value="1">1학년</option>
+                                                <option value="2">2학년</option>
+                                                <option value="3">3학년</option>
+                                                <option value="4">4학년</option>
+                                                <option value="5">5학년</option>
+                                                <option value="6">6학년</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">반</label>
+                                            <select id="classSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <option value="">선택하세요</option>
+                                                <option value="1">1반</option>
+                                                <option value="2">2반</option>
+                                                <option value="3">3반</option>
+                                                <option value="4">4반</option>
+                                                <option value="5">5반</option>
+                                                <option value="6">6반</option>
+                                                <option value="7">7반</option>
+                                                <option value="8">8반</option>
+                                                <option value="9">9반</option>
+                                                <option value="10">10반</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">담임교사</label>
+                                        <input type="text" id="teacherInput" placeholder="담임교사 성명을 입력하세요" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">비밀번호</label>
+                                        <input type="text" id="passwordInput" placeholder="학급 비밀번호 (예: class11^^)" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">예산 (원)</label>
+                                        <input type="number" id="budgetInput" placeholder="500000" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    <div class="flex space-x-3">
+                                        <button type="submit" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <i class="fas fa-save mr-2"></i>저장
+                                        </button>
+                                        <button type="button" id="resetFormBtn" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <i class="fas fa-undo mr-2"></i>초기화
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- CSV 가져오기/내보내기 -->
+                        <div class="bg-white rounded-lg shadow-sm border">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-medium text-gray-900">CSV 가져오기/내보내기</h3>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">CSV 파일 업로드</label>
+                                    <input type="file" id="csvFileInput" accept=".csv" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <p class="text-xs text-gray-500 mt-1">형식: 학년,반,담임교사,비밀번호,예산</p>
+                                </div>
+                                <div class="flex space-x-3">
+                                    <button id="importCsvBtn" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                        <i class="fas fa-upload mr-2"></i>가져오기
+                                    </button>
+                                    <button id="exportCsvBtn" class="flex-1 bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                        <i class="fas fa-download mr-2"></i>내보내기
+                                    </button>
+                                </div>
+                                <div>
+                                    <button id="downloadTemplateBtn" class="w-full bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                                        <i class="fas fa-file-csv mr-2"></i>템플릿 다운로드
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 학급 목록 -->
+                    <div class="mt-6 bg-white rounded-lg shadow-sm border">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">등록된 학급 목록</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 admin-table">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">학급</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">담임교사</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">비밀번호</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">예산</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">등록일</th>
+                                        <th class="px-6 py-3 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">액션</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="classSettingsTable" class="bg-white divide-y divide-gray-200">
+                                    <!-- 동적으로 생성 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 예산 관리 탭 -->
+                <div id="budget-tab" class="tab-panel hidden">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- 전체 예산 설정 -->
+                        <div class="bg-white rounded-lg shadow-sm border">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-medium text-gray-900">전체 예산 설정</h3>
+                            </div>
+                            <div class="p-6">
+                                <form id="budgetDistributeForm" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">전체 예산 (원)</label>
+                                        <input type="number" id="totalBudgetInput" placeholder="10000000" 
+                                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <p class="text-xs text-gray-500 mt-1">입력한 예산을 등록된 학급 수로 균등 분배합니다</p>
+                                    </div>
+                                    <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <i class="fas fa-calculator mr-2"></i>균등 분배
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- 예산 현황 요약 -->
+                        <div class="bg-white rounded-lg shadow-sm border">
+                            <div class="px-6 py-4 border-b border-gray-200">
+                                <h3 class="text-lg font-medium text-gray-900">예산 현황 요약</h3>
+                            </div>
+                            <div class="p-6">
+                                <div id="budgetSummary" class="space-y-4">
+                                    <!-- 동적으로 생성 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 학급별 예산 상세 -->
+                    <div class="mt-6 bg-white rounded-lg shadow-sm border">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">학급별 예산 관리</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 admin-table">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">학급</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">담임교사</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">할당 예산</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">사용 예산</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">잔여 예산</th>
+                                        <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">사용률</th>
+                                        <th class="px-6 py-3 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">액션</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="budgetTable" class="bg-white divide-y divide-gray-200">
+                                    <!-- 동적으로 생성 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 기보유 도서 탭 -->
+                <div id="books-tab" class="tab-panel hidden">
+                    <!-- 기존 기보유 도서 관리 내용 -->
+                    <div class="bg-white rounded-lg shadow-sm border mb-6">
+                        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="text-lg font-medium text-gray-900">기보유 도서 관리</h3>
+                            <div class="flex space-x-3">
+                                <button id="uploadOwnedBooksBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <i class="fas fa-upload mr-2"></i>CSV 업로드
+                                </button>
+                                <button id="downloadOwnedBooksBtn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                    <i class="fas fa-download mr-2"></i>CSV 다운로드
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="mb-4">
+                                <input type="file" id="ownedBooksFile" accept=".csv" class="hidden">
+                                <div class="flex items-center space-x-4">
+                                    <input type="text" id="searchOwnedBooks" placeholder="도서명, 저자로 검색..." 
+                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <button id="searchOwnedBooksBtn" class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">도서명</th>
+                                            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">저자</th>
+                                            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">등록일</th>
+                                            <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">액션</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ownedBooksTable" class="bg-white divide-y divide-gray-200">
+                                        <!-- 기보유 도서 목록이 여기에 동적으로 추가됩니다 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="ownedBooksPagination" class="mt-4 flex justify-center">
+                                <!-- 페이지네이션 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 시스템 설정 탭 -->
+                <div id="settings-tab" class="tab-panel hidden">
+                    <!-- 이메일 설정 -->
+                    <div class="bg-white rounded-lg shadow-sm border mb-6">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">이메일 설정</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <!-- 현재 설정 상태 -->
+                                <div>
+                                    <h4 class="text-md font-medium text-gray-900 mb-4">현재 설정</h4>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                            <span class="text-sm text-gray-600">개발 모드</span>
+                                            <span id="currentDevMode" class="text-sm font-medium">확인 중...</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                            <span class="text-sm text-gray-600">발신자 이메일</span>
+                                            <span id="currentFromEmail" class="text-sm font-medium">확인 중...</span>
+                                        </div>
+                                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                            <span class="text-sm text-gray-600">발신자 이름</span>
+                                            <span id="currentFromName" class="text-sm font-medium">확인 중...</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4 space-y-2">
+                                        <button id="testEmailBtn" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <i class="fas fa-vial mr-2"></i>이메일 연결 테스트
+                                        </button>
+                                        <button id="toggleDevModeBtn" class="w-full bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                            <i class="fas fa-toggle-on mr-2"></i>개발 모드 토글
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- 이메일 설정 폼 -->
+                                <div>
+                                    <h4 class="text-md font-medium text-gray-900 mb-4">이메일 설정 변경</h4>
+                                    <form id="emailConfigForm" class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">이메일 서비스</label>
+                                            <select id="emailService" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <option value="gmail">Gmail</option>
+                                                <option value="naver">Naver</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">이메일 주소</label>
+                                            <input type="email" id="emailUser" placeholder="your-email@gmail.com" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">앱 비밀번호</label>
+                                            <input type="password" id="emailPass" placeholder="앱 비밀번호 입력" 
+                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <p class="text-xs text-gray-500 mt-1">Gmail의 경우 2단계 인증 후 앱 비밀번호를 발급받아 사용하세요.</p>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="checkbox" id="emailDevMode" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                            <label for="emailDevMode" class="ml-2 block text-sm text-gray-700">
+                                                개발 모드 (실제 이메일 전송 안함)
+                                            </label>
+                                        </div>
+                                        <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                            <i class="fas fa-save mr-2"></i>설정 저장
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <!-- 이메일 설정 안내 -->
+                            <div class="mt-6 bg-blue-50 rounded-lg p-4">
+                                <h4 class="font-semibold text-blue-900 mb-2">
+                                    <i class="fas fa-info-circle mr-2"></i>이메일 설정 안내
+                                </h4>
+                                <div class="text-sm text-blue-700 space-y-2">
+                                    <p><strong>Gmail 사용 시:</strong></p>
+                                    <ol class="list-decimal list-inside ml-4 space-y-1">
+                                        <li>Google 계정에서 2단계 인증 활성화</li>
+                                        <li>앱 비밀번호 생성 (16자리)</li>
+                                        <li>생성된 앱 비밀번호를 위에 입력</li>
+                                    </ol>
+                                    <p class="mt-3"><strong>개발 모드:</strong> 실제 이메일을 전송하지 않고 콘솔에만 출력합니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API 설정 -->
+                    <div class="bg-white rounded-lg shadow-sm border">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-medium text-gray-900">API 설정</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">알라딘 API 키</label>
+                                    <div class="flex space-x-3">
+                                        <input type="text" id="settingsApiKeyInput" placeholder="API 키를 입력하세요" 
+                                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <button id="settingsTestApiBtn" class="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                            <i class="fas fa-vial mr-2"></i>테스트
+                                        </button>
+                                        <button id="settingsSaveApiBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <i class="fas fa-save mr-2"></i>저장
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">현재 API 키: <span id="settingsCurrentApiKey">로딩 중...</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 학급 관리 모달 -->
+    <div id="classManagementModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">학급 관리</h3>
+                        <button onclick="hideClassManagement()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="classManagementGrid">
+                        <!-- 학급 관리 카드들이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 기보유 도서 관리 모달 -->
+    <div id="ownedBooksModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">기보유 도서 관리</h3>
+                        <button onclick="hideOwnedBooksManagement()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- CSV 업로드 -->
+                    <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                        <h4 class="font-semibold text-blue-900 mb-2">CSV 파일 업로드</h4>
+                        <p class="text-sm text-blue-700 mb-3">도서명, 저자 컬럼이 포함된 CSV 파일을 업로드하세요.</p>
+                        <div class="flex items-center space-x-3">
+                            <input type="file" id="csvFileInput" accept=".csv" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <button id="uploadCsvBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                                업로드
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 기보유 도서 목록 -->
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">도서명</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">저자</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">등록일</th>
+                                    <th class="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">액션</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ownedBooksTable" class="bg-white divide-y divide-gray-200">
+                                <!-- 기보유 도서 목록이 여기에 동적으로 추가됩니다 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API 설정 모달 -->
+    <div id="apiSettingsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-2xl w-full">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">알라딘 API 설정</h3>
+                        <button onclick="hideApiSettings()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 현재 API 키 상태 -->
+                    <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                        <h4 class="font-semibold text-blue-900 mb-2">현재 API 키 상태</h4>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-blue-700">
+                                    현재 키: <span id="currentApiKey" class="font-mono bg-white px-2 py-1 rounded">로딩 중...</span>
+                                </p>
+                                <p class="text-xs text-blue-600 mt-1">
+                                    <span id="apiKeyStatus">상태 확인 중...</span>
+                                </p>
+                            </div>
+                            <button id="testApiBtn" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition">
+                                연결 테스트
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- API 키 설정 -->
+                    <div class="mb-6">
+                        <label for="modalApiKeyInput" class="block text-sm font-medium text-gray-700 mb-2">
+                            알라딘 TTB 키
+                        </label>
+                        <div class="flex space-x-3">
+                            <input type="text" id="modalApiKeyInput" 
+                                   class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="ttbYOURKEY001 형식으로 입력하세요">
+                            <button id="saveApiKeyBtn" class="bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition">
+                                저장
+                            </button>
+                            <button id="resetApiKeyBtn" class="bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition">
+                                초기화
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            알라딘 파트너 사이트에서 발급받은 TTB 키를 입력하세요. 
+                            <a href="https://www.aladin.co.kr/ttb/wblog_manage.aspx" target="_blank" class="text-blue-600 hover:underline">
+                                키 발급받기 <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </p>
+                    </div>
+                    
+                    <!-- API 키 사용법 안내 -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-900 mb-2">
+                            <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                            API 키 발급 방법
+                        </h4>
+                        <ol class="text-sm text-gray-700 space-y-1 list-decimal list-inside">
+                            <li>알라딘 파트너 사이트에 로그인</li>
+                            <li>"API 신청" 메뉴에서 도서 검색 API 신청</li>
+                            <li>승인 후 발급받은 TTB 키를 위에 입력</li>
+                            <li>"연결 테스트" 버튼으로 정상 작동 확인</li>
+                        </ol>
+                        <p class="text-xs text-gray-500 mt-2">
+                            기본 제공되는 키로도 사용 가능하지만, 개인 키 사용을 권장합니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 알림 토스트 -->
+    <div id="toast" class="fixed top-4 right-4 max-w-sm w-full hidden z-50">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i id="toastIcon" class="text-xl"></i>
+                </div>
+                <div class="ml-3 w-0 flex-1">
+                    <p id="toastTitle" class="text-sm font-medium text-gray-900"></p>
+                    <p id="toastMessage" class="mt-1 text-sm text-gray-500"></p>
+                </div>
+                <div class="ml-4 flex-shrink-0 flex">
+                    <button id="closeToast" class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 파일들 - 의존성 순서대로 로드 -->
+    <script src="../js/utils.js"></script>
+    <script src="../js/api-client.js"></script>
+    <script src="../js/api-handler.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html> 

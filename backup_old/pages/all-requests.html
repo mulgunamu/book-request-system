@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전체 신청현황 - 교내 희망 도서 구매 관리 시스템</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 폰트 어썸 아이콘 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 추가 커스텀 스타일 */
+        .loading {
+            display: none;
+        }
+        .loading.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- 네비게이션 바 -->
+    <nav class="bg-indigo-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-xl font-bold">희망 도서 신청 시스템</a>
+                <div class="flex space-x-4">
+                    <a href="../index.html" class="hover:underline">홈</a>
+                    <a href="class-view.html" class="hover:underline">학급별 신청현황</a>
+                    <a href="all-requests.html" class="hover:underline font-bold">전체 신청현황</a>
+                    <a href="admin.html" class="hover:underline">관리자</a>
+                </div>
+                <!-- 모바일 메뉴 버튼 -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-white">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- 모바일 메뉴 -->
+            <div id="mobile-menu" class="hidden md:hidden mt-4 space-y-2">
+                <a href="../index.html" class="block hover:bg-indigo-700 px-2 py-1 rounded">홈</a>
+                <a href="class-view.html" class="block hover:bg-indigo-700 px-2 py-1 rounded">학급별 신청현황</a>
+                <a href="all-requests.html" class="block hover:bg-indigo-700 px-2 py-1 rounded font-bold">전체 신청현황</a>
+                <a href="admin.html" class="block hover:bg-indigo-700 px-2 py-1 rounded">관리자</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">전체 희망 도서 신청 현황</h1>
+            
+            <!-- 검색 및 필터링 -->
+            <div class="mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div class="md:col-span-2">
+                        <label for="search-input" class="block text-gray-700 mb-1">검색</label>
+                        <input type="text" id="search-input" class="w-full p-2 border border-gray-300 rounded" placeholder="도서명, 저자, 출판사 검색">
+                    </div>
+                    <div>
+                        <label for="date-from" class="block text-gray-700 mb-1">시작일</label>
+                        <input type="date" id="date-from" class="w-full p-2 border border-gray-300 rounded">
+                    </div>
+                    <div>
+                        <label for="date-to" class="block text-gray-700 mb-1">종료일</label>
+                        <input type="date" id="date-to" class="w-full p-2 border border-gray-300 rounded">
+                    </div>
+                </div>
+                
+                <!-- 정렬 및 검색 버튼 -->
+                <div class="flex flex-col md:flex-row justify-between space-y-2 md:space-y-0">
+                    <div class="flex items-center">
+                        <label for="sort-by" class="mr-2 text-gray-700">정렬:</label>
+                        <select id="sort-by" class="p-2 border border-gray-300 rounded">
+                            <option value="date-desc">신청일 (최신순)</option>
+                            <option value="date-asc">신청일 (오래된순)</option>
+                            <option value="class">학급순</option>
+                            <option value="title">도서명순</option>
+                            <option value="price-desc">가격 (높은순)</option>
+                            <option value="price-asc">가격 (낮은순)</option>
+                        </select>
+                    </div>
+                    <button id="search-btn" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition">
+                        검색
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 통계 요약 정보 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-indigo-50 rounded-lg p-4 border-l-4 border-indigo-500">
+                    <h3 class="font-bold text-lg text-indigo-800">총 신청 도서</h3>
+                    <p class="text-2xl font-bold mt-2"><span id="total-books-count">0</span>권</p>
+                </div>
+                <div class="bg-indigo-50 rounded-lg p-4 border-l-4 border-indigo-500">
+                    <h3 class="font-bold text-lg text-indigo-800">총 금액</h3>
+                    <p class="text-2xl font-bold mt-2" id="total-price">0원</p>
+                </div>
+                <div class="bg-indigo-50 rounded-lg p-4 border-l-4 border-indigo-500">
+                    <h3 class="font-bold text-lg text-indigo-800">참여 학급</h3>
+                    <p class="text-2xl font-bold mt-2"><span id="total-classes">0</span>개 학급</p>
+                </div>
+            </div>
+            
+            <!-- 신청 도서 목록 -->
+            <div id="book-list-container">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">신청 도서 목록</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="px-4 py-2 text-left text-gray-700 border-b">학급</th>
+                                <th class="px-4 py-2 text-left text-gray-700 border-b">담당교사</th>
+                                <th class="px-4 py-2 text-left text-gray-700 border-b">도서명</th>
+                                <th class="px-4 py-2 text-left text-gray-700 border-b">저자</th>
+                                <th class="px-4 py-2 text-left text-gray-700 border-b">출판사</th>
+                                <th class="px-4 py-2 text-right text-gray-700 border-b">가격</th>
+                                <th class="px-4 py-2 text-left text-gray-700 border-b">신청일</th>
+                            </tr>
+                        </thead>
+                        <tbody id="book-list">
+                            <!-- 동적으로 채워짐 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 페이지네이션 -->
+                <div class="flex justify-between items-center mt-4">
+                    <div class="text-gray-600">총 <span id="current-total-books">0</span>권의 도서</div>
+                    <div class="flex space-x-2" id="pagination">
+                        <!-- 동적으로 채워짐 -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 데이터 없음 메시지 -->
+            <div id="no-data-message" class="hidden text-center py-8 text-gray-500">
+                <i class="fas fa-book-open text-4xl mb-2"></i>
+                <p>검색 조건에 맞는 도서가 없습니다.</p>
+            </div>
+            
+            <!-- 내보내기 버튼 -->
+            <div class="flex justify-end mt-6">
+                <button id="export-csv-btn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+                    CSV 내보내기
+                </button>
+            </div>
+            
+            <!-- 로딩 표시 -->
+            <div id="loading" class="loading items-center justify-center mt-4">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-700"></div>
+                <span class="ml-3 text-indigo-700">데이터 로딩 중...</span>
+            </div>
+            
+            <!-- 에러 메시지 -->
+            <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4">
+                <span id="error-text"></span>
+            </div>
+        </div>
+    </main>
+    
+    <!-- 푸터 -->
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-lg font-bold">교내 희망 도서 구매 관리 시스템</h3>
+                    <p class="text-gray-400">© 2025 All Rights Reserved</p>
+                </div>
+                <div>
+                    <p class="text-gray-400">문의: admin@school.edu</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 자바스크립트 -->
+    <script src="../js/utils.js"></script>
+    <script src="../js/data-manager.js"></script>
+    <script>
+        // DOM이 완전히 로드된 후 실행
+        document.addEventListener('DOMContentLoaded', () => {
+            // 전역 변수
+            let allBooks = []; // 모든 도서 목록
+            let filteredBooks = []; // 필터링된 도서 목록
+            let currentPage = 1; // 현재 페이지
+            const itemsPerPage = 20; // 페이지당 아이템 수
+            
+            // DOM 요소
+            const searchInput = document.getElementById('search-input');
+            const dateFrom = document.getElementById('date-from');
+            const dateTo = document.getElementById('date-to');
+            const sortBy = document.getElementById('sort-by');
+            const searchBtn = document.getElementById('search-btn');
+            const totalBooksCount = document.getElementById('total-books-count');
+            const totalPrice = document.getElementById('total-price');
+            const totalClasses = document.getElementById('total-classes');
+            const bookList = document.getElementById('book-list');
+            const bookListContainer = document.getElementById('book-list-container');
+            const noDataMessage = document.getElementById('no-data-message');
+            const currentTotalBooks = document.getElementById('current-total-books');
+            const pagination = document.getElementById('pagination');
+            const exportCsvBtn = document.getElementById('export-csv-btn');
+            
+            /**
+             * 페이지 초기화 함수
+             */
+            const initPage = async () => {
+                try {
+                    // 로딩 표시
+                    Utils.toggleLoading(true);
+                    
+                    // 모든 도서 정보 로드
+                    allBooks = await DataManager.getAllRequestedBooks();
+                    
+                    // 현재 날짜 기본값 설정
+                    const today = new Date();
+                    const oneMonthAgo = new Date(today);
+                    oneMonthAgo.setMonth(today.getMonth() - 1);
+                    
+                    dateFrom.value = Utils.formatDate(oneMonthAgo);
+                    dateTo.value = Utils.formatDate(today);
+                    
+                    // 통계 정보 업데이트
+                    updateStatistics();
+                    
+                    // 이벤트 리스너 등록
+                    registerEventListeners();
+                    
+                    // 초기 검색 실행
+                    searchBooks();
+                    
+                    // 로딩 해제
+                    Utils.toggleLoading(false);
+                } catch (error) {
+                    console.error('페이지 초기화 오류:', error);
+                    Utils.showError('시스템 초기화 중 오류가 발생했습니다.');
+                    Utils.toggleLoading(false);
+                }
+            };
+            
+            /**
+             * 이벤트 리스너 등록 함수
+             */
+            const registerEventListeners = () => {
+                // 검색 버튼 클릭
+                searchBtn.addEventListener('click', searchBooks);
+                
+                // 정렬 변경
+                sortBy.addEventListener('change', sortBooks);
+                
+                // CSV 내보내기 버튼 클릭
+                exportCsvBtn.addEventListener('click', exportCSV);
+                
+                // 엔터 키로 검색
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        searchBooks();
+                    }
+                });
+                
+                // 모바일 메뉴 토글
+                document.getElementById('mobile-menu-button').addEventListener('click', function() {
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    mobileMenu.classList.toggle('hidden');
+                });
+            };
+            
+            /**
+             * 통계 정보 업데이트 함수
+             */
+            const updateStatistics = () => {
+                // 전체 도서 수
+                totalBooksCount.textContent = allBooks.length;
+                
+                // 전체 금액
+                const sum = allBooks.reduce((total, book) => total + (book.price || 0), 0);
+                totalPrice.textContent = Utils.formatPrice(sum);
+                
+                // 참여 학급 수
+                const classSet = new Set(allBooks.map(book => book.gradeClass));
+                totalClasses.textContent = classSet.size;
+            };
+            
+            /**
+             * 도서 검색 함수
+             */
+            const searchBooks = async () => {
+                try {
+                    // 로딩 표시
+                    Utils.toggleLoading(true);
+                    
+                    // 검색어
+                    const searchText = searchInput.value.toLowerCase().trim();
+                    
+                    // 날짜 범위
+                    const from = dateFrom.value ? new Date(dateFrom.value) : null;
+                    const to = dateTo.value ? new Date(dateTo.value) : null;
+                    
+                    // 종료일을 하루 뒤로 설정 (해당일까지 포함)
+                    if (to) {
+                        to.setDate(to.getDate() + 1);
+                    }
+                    
+                    // 도서 필터링
+                    filteredBooks = allBooks.filter(book => {
+                        // 검색어 필터링
+                        const searchMatch = !searchText || 
+                            book.title?.toLowerCase().includes(searchText) || 
+                            book.author?.toLowerCase().includes(searchText) || 
+                            book.publisher?.toLowerCase().includes(searchText);
+                        
+                        // 날짜 필터링
+                        let dateMatch = true;
+                        if (book.requestDate) {
+                            const requestDate = new Date(book.requestDate);
+                            if (from && to) {
+                                dateMatch = requestDate >= from && requestDate < to;
+                            } else if (from) {
+                                dateMatch = requestDate >= from;
+                            } else if (to) {
+                                dateMatch = requestDate < to;
+                            }
+                        }
+                        
+                        return searchMatch && dateMatch;
+                    });
+                    
+                    // 정렬
+                    applySorting();
+                    
+                    // 첫 페이지로 설정
+                    currentPage = 1;
+                    
+                    // 도서 목록 표시
+                    displayBooks();
+                    
+                    // 로딩 해제
+                    Utils.toggleLoading(false);
+                } catch (error) {
+                    console.error('도서 검색 오류:', error);
+                    Utils.showError('도서 검색 중 오류가 발생했습니다.');
+                    Utils.toggleLoading(false);
+                }
+            };
+            
+            /**
+             * 정렬 적용 함수
+             */
+            const applySorting = () => {
+                const sortType = sortBy.value;
+                
+                switch (sortType) {
+                    case 'date-desc':
+                        // 신청일 내림차순 (최신순)
+                        filteredBooks.sort((a, b) => new Date(b.requestDate) - new Date(a.requestDate));
+                        break;
+                    case 'date-asc':
+                        // 신청일 오름차순 (오래된순)
+                        filteredBooks.sort((a, b) => new Date(a.requestDate) - new Date(b.requestDate));
+                        break;
+                    case 'class':
+                        // 학급순
+                        filteredBooks.sort((a, b) => a.gradeClass.localeCompare(b.gradeClass));
+                        break;
+                    case 'title':
+                        // 도서명순
+                        filteredBooks.sort((a, b) => a.title.localeCompare(b.title));
+                        break;
+                    case 'price-desc':
+                        // 가격 내림차순 (높은순)
+                        filteredBooks.sort((a, b) => (b.price || 0) - (a.price || 0));
+                        break;
+                    case 'price-asc':
+                        // 가격 오름차순 (낮은순)
+                        filteredBooks.sort((a, b) => (a.price || 0) - (b.price || 0));
+                        break;
+                }
+            };
+            
+            /**
+             * 정렬 변경 함수
+             */
+            const sortBooks = () => {
+                // 정렬 적용
+                applySorting();
+                
+                // 도서 목록 표시
+                displayBooks();
+            };
+            
+            /**
+             * 도서 목록 표시 함수
+             */
+            const displayBooks = () => {
+                // 도서 목록 초기화
+                Utils.clearElement(bookList);
+                
+                // 데이터 유무에 따라 메시지 표시
+                if (filteredBooks.length === 0) {
+                    Utils.toggleVisibility(bookListContainer, false);
+                    Utils.toggleVisibility(noDataMessage, true);
+                    return;
+                } else {
+                    Utils.toggleVisibility(bookListContainer, true);
+                    Utils.toggleVisibility(noDataMessage, false);
+                }
+                
+                // 현재 도서 수 업데이트
+                currentTotalBooks.textContent = filteredBooks.length;
+                
+                // 페이지네이션 계산
+                const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = Math.min(startIndex + itemsPerPage, filteredBooks.length);
+                
+                // 현재 페이지의 도서들만 표시
+                const currentPageBooks = filteredBooks.slice(startIndex, endIndex);
+                
+                // 각 도서에 대한 행 추가
+                currentPageBooks.forEach(book => {
+                    const row = document.createElement('tr');
+                    
+                    // 학급 셀
+                    const classCell = document.createElement('td');
+                    classCell.className = 'px-4 py-2 border-b';
+                    const [grade, classNum] = book.gradeClass ? book.gradeClass.split('-') : ['', ''];
+                    classCell.textContent = `${grade}학년 ${classNum}반`;
+                    row.appendChild(classCell);
+                    
+                    // 담당교사 셀
+                    const teacherCell = document.createElement('td');
+                    teacherCell.className = 'px-4 py-2 border-b';
+                    teacherCell.textContent = book.teacher || '미지정';
+                    row.appendChild(teacherCell);
+                    
+                    // 도서명 셀
+                    const titleCell = document.createElement('td');
+                    titleCell.className = 'px-4 py-2 border-b';
+                    titleCell.textContent = book.title;
+                    row.appendChild(titleCell);
+                    
+                    // 저자 셀
+                    const authorCell = document.createElement('td');
+                    authorCell.className = 'px-4 py-2 border-b';
+                    authorCell.textContent = book.author;
+                    row.appendChild(authorCell);
+                    
+                    // 출판사 셀
+                    const publisherCell = document.createElement('td');
+                    publisherCell.className = 'px-4 py-2 border-b';
+                    publisherCell.textContent = book.publisher;
+                    row.appendChild(publisherCell);
+                    
+                    // 가격 셀
+                    const priceCell = document.createElement('td');
+                    priceCell.className = 'px-4 py-2 border-b text-right';
+                    priceCell.textContent = Utils.formatPrice(book.price);
+                    row.appendChild(priceCell);
+                    
+                    // 신청일 셀
+                    const dateCell = document.createElement('td');
+                    dateCell.className = 'px-4 py-2 border-b';
+                    dateCell.textContent = Utils.formatDate(book.requestDate);
+                    row.appendChild(dateCell);
+                    
+                    // 행을 테이블에 추가
+                    bookList.appendChild(row);
+                });
+                
+                // 페이지네이션 버튼 업데이트
+                updatePagination(totalPages);
+            };
+            
+            /**
+             * 페이지네이션 업데이트 함수
+             * @param {number} totalPages - 전체 페이지 수
+             */
+            const updatePagination = (totalPages) => {
+                // 페이지네이션 초기화
+                Utils.clearElement(pagination);
+                
+                // 전체 페이지가 1 이하면 페이지네이션 표시하지 않음
+                if (totalPages <= 1) return;
+                
+                // 이전 페이지 버튼
+                if (currentPage > 1) {
+                    const prevButton = createPageButton('이전', () => {
+                        currentPage--;
+                        displayBooks();
+                    });
+                    pagination.appendChild(prevButton);
+                }
+                
+                // 페이지 버튼 (최대 5개까지만 표시)
+                const startPage = Math.max(1, currentPage - 2);
+                const endPage = Math.min(totalPages, startPage + 4);
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageButton = createPageButton(i.toString(), () => {
+                        currentPage = i;
+                        displayBooks();
+                    }, i === currentPage);
+                    pagination.appendChild(pageButton);
+                }
+                
+                // 다음 페이지 버튼
+                if (currentPage < totalPages) {
+                    const nextButton = createPageButton('다음', () => {
+                        currentPage++;
+                        displayBooks();
+                    });
+                    pagination.appendChild(nextButton);
+                }
+            };
+            
+            /**
+             * 페이지 버튼 생성 함수
+             * @param {string} text - 버튼 텍스트
+             * @param {function} onClick - 클릭 핸들러
+             * @param {boolean} isActive - 현재 페이지 여부
+             * @returns {HTMLElement} - 생성된 버튼 요소
+             */
+            const createPageButton = (text, onClick, isActive = false) => {
+                const button = document.createElement('button');
+                
+                if (isActive) {
+                    button.className = 'px-3 py-1 bg-indigo-600 text-white rounded';
+                } else {
+                    button.className = 'px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300';
+                }
+                
+                button.textContent = text;
+                button.addEventListener('click', onClick);
+                
+                return button;
+            };
+            
+            /**
+             * CSV 내보내기 함수
+             */
+            const exportCSV = () => {
+                try {
+                    if (filteredBooks.length === 0) {
+                        Utils.showError('내보낼 데이터가 없습니다.');
+                        return;
+                    }
+                    
+                    // 파일명 생성
+                    const filename = `희망도서_전체_${Utils.formatDate(new Date()).replaceAll('-', '')}.csv`;
+                    
+                    // CSV 다운로드
+                    Utils.downloadBooksAsCSV(filteredBooks, filename);
+                } catch (error) {
+                    console.error('CSV 내보내기 오류:', error);
+                    Utils.showError('CSV 내보내기 중 오류가 발생했습니다.');
+                }
+            };
+            
+            // 페이지 초기화 실행
+            initPage();
+        });
+    </script>
+</body>
+</html>

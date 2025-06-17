@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>교내 희망도서 신청시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 헤더 -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-book-open text-blue-600 text-2xl mr-3"></i>
+                    <h1 class="text-xl font-bold text-gray-900">교내 희망도서 신청시스템</h1>
+                </div>
+                <nav class="flex space-x-4">
+                    <a href="applications.html" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-list mr-1"></i>신청목록
+                    </a>
+                    <a href="#" onclick="checkAdminAccess()" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-cog mr-1"></i>관리자
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 학급 정보 입력 -->
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-users text-blue-600 mr-2"></i>학급 정보
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label for="grade" class="block text-sm font-medium text-gray-700 mb-1">학년</label>
+                    <select id="grade" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">학년 선택</option>
+                        <option value="1">1학년</option>
+                        <option value="2">2학년</option>
+                        <option value="3">3학년</option>
+                        <option value="4">4학년</option>
+                        <option value="5">5학년</option>
+                        <option value="6">6학년</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="class" class="block text-sm font-medium text-gray-700 mb-1">반</label>
+                    <select id="class" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">반 선택</option>
+                        <!-- 학년 선택 시 동적으로 로드됩니다 -->
+                    </select>
+                </div>
+                <div>
+                    <label for="teacher" class="block text-sm font-medium text-gray-700 mb-1">담임교사</label>
+                    <input type="text" id="teacher" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="담임교사 이름">
+                </div>
+                <div class="flex items-end">
+                    <button id="setClassBtn" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-check mr-1"></i>확인
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 선택된 학급 정보 표시 -->
+            <div id="classInfo" class="hidden mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            <span id="displayClass"></span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">담임:</span>
+                            <span id="displayTeacher" class="font-medium"></span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-600">예산 현황</div>
+                        <div class="text-lg font-bold text-blue-600">
+                            <span id="usedBudget">0</span>원 / <span id="totalBudget">0</span>원
+                        </div>
+                        <div class="w-48 bg-gray-200 rounded-full h-2 mt-1">
+                            <div id="budgetBar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- 카테고리 사이드바 -->
+            <aside class="lg:w-64">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-list text-blue-600 mr-2"></i>도서 카테고리
+                    </h3>
+                    
+                    <!-- 검색창 -->
+                    <div class="mb-4">
+                        <div class="relative mb-2">
+                            <input type="text" id="searchInput" 
+                                   placeholder="도서명, 저자명, 출판사 검색..." 
+                                   class="w-full p-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <button id="searchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- 검색 옵션 -->
+                        <div class="flex flex-wrap gap-2 text-xs">
+                            <select id="searchType" class="px-2 py-1 border border-gray-200 rounded text-gray-600 bg-white">
+                                <option value="Title">제목 검색</option>
+                                <option value="Author">저자 검색</option>
+                                <option value="Publisher">출판사 검색</option>
+                                <option value="Keyword">통합 검색</option>
+                            </select>
+                            
+                            <select id="searchSort" class="px-2 py-1 border border-gray-200 rounded text-gray-600 bg-white">
+                                <option value="SalesPoint">판매량순</option>
+                                <option value="PublishTime">출간일순</option>
+                                <option value="CustomerRating">평점순</option>
+                                <option value="Title">제목순</option>
+                                <option value="Accuracy">관련도순</option>
+                            </select>
+                            
+                            <label class="flex items-center text-gray-600">
+                                <input type="checkbox" id="recentOnly" class="mr-1">
+                                <span>최근 6개월</span>
+                            </label>
+                            
+                            <label class="flex items-center text-gray-600">
+                                <input type="checkbox" id="inStockOnly" class="mr-1" checked>
+                                <span>재고 있는 도서만</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- 카테고리 목록 -->
+                    <div class="space-y-2" id="categoryList">
+                        <!-- 베스트셀러 및 특별 리스트 -->
+                        <div class="category-group">
+                            <button class="category-parent-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition flex items-center justify-between expanded" data-category="bestseller">
+                                <span><i class="fas fa-star text-yellow-500 mr-2"></i>베스트셀러 & 추천도서</span>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="subcategory-list ml-4 mt-2 space-y-1 show">
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition active" data-category="bestseller">
+                                    <i class="fas fa-trophy text-yellow-500 mr-2"></i>베스트셀러
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="itemnewspecial">
+                                    <i class="fas fa-fire text-red-500 mr-2"></i>주목할 만한 신간
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="itemnewall">
+                                    <i class="fas fa-sparkles text-blue-500 mr-2"></i>신간 전체 리스트
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="itemeditorchoice">
+                                    <i class="fas fa-heart text-pink-500 mr-2"></i>편집자 추천
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="blogbest">
+                                    <i class="fas fa-blog text-purple-500 mr-2"></i>블로거 베스트셀러
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 초등1~2학년 -->
+                        <div class="category-group">
+                            <button class="category-parent-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition flex items-center justify-between" data-category="48803">
+                                <span><i class="fas fa-seedling text-green-500 mr-2"></i>초등1~2학년</span>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="subcategory-list hidden ml-4 mt-2 space-y-1">
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48803">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>전체
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="54856">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>1학년 입학 준비
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48824">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>그림책
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48825">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>동화/명작/고전
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48822">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>과학/수학/사회
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48826">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>문화/예술/인물
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48827">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>상식/교양
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48828">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>자기계발
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48829">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>책읽기/글쓰기
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48830">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>초등 영어
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48831">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>학습만화
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 초등3~4학년 -->
+                        <div class="category-group">
+                            <button class="category-parent-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition flex items-center justify-between" data-category="48804">
+                                <span><i class="fas fa-leaf text-green-600 mr-2"></i>초등3~4학년</span>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="subcategory-list hidden ml-4 mt-2 space-y-1">
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48804">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>전체
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48837">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>동화/명작/고전
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48834">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>과학/수학/사회
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48838">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>문화/예술/인물
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48839">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>상식/교양
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48840">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>자기계발
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48841">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>책읽기/글쓰기
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48842">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>초등 영어
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48843">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>학습만화
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 초등5~6학년 -->
+                        <div class="category-group">
+                            <button class="category-parent-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition flex items-center justify-between" data-category="48805">
+                                <span><i class="fas fa-tree text-green-700 mr-2"></i>초등5~6학년</span>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="subcategory-list hidden ml-4 mt-2 space-y-1">
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48805">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>전체
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48846">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>동화/명작/고전
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48844">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>과학/수학/사회
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48847">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>문화/예술/인물
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48848">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>상식/교양
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48849">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>자기계발
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48850">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>중학교 선행 학습
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48851">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>책읽기/글쓰기
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48852">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>초등 영어
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48853">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>학습만화
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 동화명작고전 -->
+                        <div class="category-group">
+                            <button class="category-parent-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition flex items-center justify-between" data-category="48810">
+                                <span><i class="fas fa-book-open text-purple-500 mr-2"></i>동화명작고전</span>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="subcategory-list hidden ml-4 mt-2 space-y-1">
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48810">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>전체
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48873">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>가족 이야기
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48874">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>국내창작동화
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48875">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>세계명작
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48876">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>어린이를 위한 고전
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="49220">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>역사동화
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48877">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>외국창작동화
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48878">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>학교 이야기
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="49223">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>학습동화
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 사회역사철학 -->
+                        <div class="category-group">
+                            <button class="category-parent-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition flex items-center justify-between" data-category="48813">
+                                <span><i class="fas fa-globe text-blue-500 mr-2"></i>사회역사철학</span>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="subcategory-list hidden ml-4 mt-2 space-y-1">
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48813">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>전체
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="89740">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>사회 일반
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48905">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>세계사
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48910">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>신화/종교
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48907">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>인권/평등
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48908">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>전쟁/평화 이야기
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48909">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>정치/경제/법
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48911">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>지리/지도책
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48912">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>철학
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48913">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>통일을 생각해요
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48904">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>초등 한국사
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 과학수학컴퓨터 -->
+                        <div class="category-group">
+                            <button class="category-parent-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition flex items-center justify-between" data-category="48809">
+                                <span><i class="fas fa-flask text-orange-500 mr-2"></i>과학수학컴퓨터</span>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="subcategory-list hidden ml-4 mt-2 space-y-1">
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48809">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>전체
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48867">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>과학 일반
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48868">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>과학자
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48869">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>생물과 생명
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="49609">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>우리 몸
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48870">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>지구와 우주
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48871">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>초등 수학
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="128216">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>컴퓨터와 코딩
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48872">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>환경 이야기
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 문화예술인물 -->
+                        <div class="category-group">
+                            <button class="category-parent-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition flex items-center justify-between" data-category="48812">
+                                <span><i class="fas fa-palette text-pink-500 mr-2"></i>문화예술인물</span>
+                                <i class="fas fa-chevron-down transition-transform"></i>
+                            </button>
+                            <div class="subcategory-list hidden ml-4 mt-2 space-y-1">
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48812">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>전체
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48897">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>다문화 이야기
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48898">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>미술관/박물관
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48900">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>세계문화
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48899">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>세계인물
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48901">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>여성인물
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="51820">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>음악/미술/예체능
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="51822">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>직업의 세계
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48902">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>한국인물
+                                </button>
+                                <button class="category-btn w-full text-left p-2 text-sm rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 transition" data-category="48903">
+                                    <i class="fas fa-circle text-xs text-gray-400 mr-2"></i>한국전통문화
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 학습만화 -->
+                        <button class="category-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition" data-category="112080">
+                            <i class="fas fa-pen-fancy text-indigo-500 mr-2"></i>학습만화
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 메인 컨텐츠 -->
+            <div class="flex-1">
+                <!-- 도서 목록 헤더 -->
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-semibold text-gray-800">
+                            <span id="currentCategory">베스트셀러</span>
+                        </h2>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-sm text-gray-600">
+                                총 <span id="totalBooks">0</span>권
+                            </div>
+                            <select id="sortBy" class="p-2 border border-gray-300 rounded-lg text-sm">
+                                <option value="salesPoint">판매량순 ↓</option>
+                                <option value="publishTime">출간일순 ↓ (최신순)</option>
+                                <option value="customerReviewRank">평점순 ↓</option>
+                                <option value="reviewCount">리뷰순 ↓</option>
+                                <option value="title">제목순 ↑ (가나다순)</option>
+                                <option value="priceAsc">가격순 ↑ (낮은순)</option>
+                                <option value="priceDesc">가격순 ↓ (높은순)</option>
+                                <option value="accuracy">정확도순 ↓</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 도서 그리드 -->
+                <div id="booksGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    <!-- 도서 카드들이 여기에 동적으로 추가됩니다 -->
+                </div>
+
+                <!-- 로딩 표시 -->
+                <div id="loading" class="hidden text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p class="text-gray-600">도서 정보를 불러오는 중...</p>
+                </div>
+
+                <!-- 더보기 버튼 -->
+                <div class="text-center mt-8">
+                    <button id="loadMoreBtn" class="hidden bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-plus mr-2"></i>더 많은 도서 보기
+                    </button>
+                </div>
+
+                <!-- 빈 상태 -->
+                <div id="emptyState" class="hidden text-center py-12">
+                    <i class="fas fa-search text-gray-400 text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">검색 결과가 없습니다</h3>
+                    <p class="text-gray-600">다른 검색어를 시도해보세요.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 도서 상세 모달 -->
+    <div id="bookModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">도서 상세정보</h3>
+                        <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="modalContent">
+                        <!-- 모달 내용이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 알림 토스트 -->
+    <div id="toast" class="fixed top-4 right-4 max-w-sm w-full hidden z-50">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i id="toastIcon" class="text-xl"></i>
+                </div>
+                <div class="ml-3 w-0 flex-1">
+                    <p id="toastTitle" class="text-sm font-medium text-gray-900"></p>
+                    <p id="toastMessage" class="mt-1 text-sm text-gray-500"></p>
+                </div>
+                <div class="ml-4 flex-shrink-0 flex">
+                    <button id="closeToast" class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api-client.js"></script>
+    <script src="js/api-handler.js"></script>
+    <script>
+        // 관리자 접근 체크 함수
+        function checkAdminAccess() {
+            if (Auth.isAuthenticated()) {
+                // 이미 로그인된 경우 바로 관리자 페이지로
+                window.location.href = 'admin/index.html';
+            } else {
+                // 로그인이 필요한 경우 로그인 페이지로
+                window.location.href = 'admin/login.html';
+            }
+        }
+    </script>
+    <script src="js/main.js"></script>
+</body>
+</html> 

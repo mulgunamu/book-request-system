@@ -1,0 +1,142 @@
+{
+  "1-1": {
+    "grade": 1,
+    "class": 1,
+    "classId": "1-1",
+    "teacher": "김성옥",
+    "password": "class11^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.148Z",
+    "updatedAt": "2025-06-06T09:35:11.956Z"
+  },
+  "1-2": {
+    "grade": 1,
+    "class": 2,
+    "classId": "1-2",
+    "teacher": "김다솜",
+    "password": "class12^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.149Z",
+    "updatedAt": "2025-06-06T09:35:11.956Z"
+  },
+  "2-1": {
+    "grade": 2,
+    "class": 1,
+    "classId": "2-1",
+    "teacher": "곽유미",
+    "password": "class21^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.149Z",
+    "updatedAt": "2025-06-08T02:05:45.796Z"
+  },
+  "2-2": {
+    "grade": 2,
+    "class": 2,
+    "classId": "2-2",
+    "teacher": "권혜은",
+    "password": "class22^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.149Z",
+    "updatedAt": "2025-06-08T02:05:57.446Z"
+  },
+  "3-1": {
+    "grade": 3,
+    "class": 1,
+    "classId": "3-1",
+    "teacher": "최민교",
+    "password": "class31^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.149Z",
+    "updatedAt": "2025-06-08T02:06:11.723Z"
+  },
+  "3-2": {
+    "grade": 3,
+    "class": 2,
+    "classId": "3-2",
+    "teacher": "정재은",
+    "password": "class32^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.149Z",
+    "updatedAt": "2025-06-08T02:06:31.459Z"
+  },
+  "4-1": {
+    "grade": 4,
+    "class": 1,
+    "classId": "4-1",
+    "teacher": "김성권",
+    "password": "class41^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.149Z",
+    "updatedAt": "2025-06-08T02:06:44.487Z"
+  },
+  "4-2": {
+    "grade": 4,
+    "class": 2,
+    "classId": "4-2",
+    "teacher": "유지원",
+    "password": "class42^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.149Z",
+    "updatedAt": "2025-06-08T02:07:20.522Z"
+  },
+  "5-1": {
+    "grade": 5,
+    "class": 1,
+    "classId": "5-1",
+    "teacher": "홍준석",
+    "password": "class51^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.149Z",
+    "updatedAt": "2025-06-08T02:07:37.487Z"
+  },
+  "5-2": {
+    "grade": 5,
+    "class": 2,
+    "classId": "5-2",
+    "teacher": "이지현",
+    "password": "class52^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.149Z",
+    "updatedAt": "2025-06-08T02:07:48.317Z"
+  },
+  "6-1": {
+    "grade": 6,
+    "class": 1,
+    "classId": "6-1",
+    "teacher": "안민하",
+    "password": "class61^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.149Z",
+    "updatedAt": "2025-06-08T02:07:59.358Z"
+  },
+  "6-2": {
+    "grade": 6,
+    "class": 2,
+    "classId": "6-2",
+    "teacher": "박태일",
+    "password": "class62^^",
+    "budget": 250000,
+    "createdAt": "2025-05-26T09:29:03.149Z",
+    "updatedAt": "2025-06-08T02:08:15.545Z"
+  },
+  "4-3": {
+    "grade": 4,
+    "class": 3,
+    "classId": "4-3",
+    "teacher": "우덕상",
+    "password": "class43^^",
+    "budget": 250000,
+    "createdAt": "2025-05-27T14:18:21.141Z",
+    "updatedAt": "2025-06-06T09:35:11.958Z"
+  },
+  "6-3": {
+    "grade": 6,
+    "class": 3,
+    "classId": "6-3",
+    "teacher": "박송이",
+    "password": "class63^^",
+    "budget": 250000,
+    "createdAt": "2025-05-27T14:19:08.168Z",
+    "updatedAt": "2025-06-06T09:35:11.959Z"
+  }
+}

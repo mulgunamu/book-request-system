@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - API 키 관리</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- 네비게이션 -->
+    <nav class="bg-indigo-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-xl font-bold">희망 도서 신청 시스템</a>
+                <div class="flex space-x-4">
+                    <a href="../index.html" class="hover:underline">홈</a>
+                    <a href="class-view.html" class="hover:underline">학급별 현황</a>
+                    <a href="all-requests.html" class="hover:underline">전체 현황</a>
+                    <a href="admin.html" class="hover:underline font-bold">관리자</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="container mx-auto px-4 py-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-8">시스템 관리</h1>
+        
+        <!-- 탭 메뉴 -->
+        <div class="mb-6">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8">
+                    <button id="api-tab" class="tab-button active py-2 px-1 border-b-2 border-indigo-500 text-indigo-600 font-medium">
+                        API 키 관리
+                    </button>
+                    <button id="class-tab" class="tab-button py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                        학급 관리
+                    </button>
+                    <button id="export-tab" class="tab-button py-2 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700">
+                        데이터 내보내기
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- API 키 관리 탭 -->
+        <div id="api-management" class="tab-content">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-key text-indigo-600 mr-2"></i>
+                    API 키 설정
+                </h2>
+                
+                <!-- 카카오 API 키 -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-gray-800">카카오 도서 검색 API</h3>
+                            <p class="text-sm text-gray-600">도서 검색 기능에 필요한 API 키입니다.</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span id="kakao-status" class="px-2 py-1 text-xs rounded font-medium bg-gray-100 text-gray-600">
+                                <i class="fas fa-question-circle mr-1"></i>확인 중
+                            </span>
+                            <button id="test-kakao-btn" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                                <i class="fas fa-play"></i> 테스트
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <input 
+                            type="password" 
+                            id="kakao-api-key" 
+                            placeholder="카카오 API 키를 입력하세요"
+                            class="flex-1 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        >
+                        <button id="save-kakao-btn" class="bg-indigo-600 text-white px-6 py-3 rounded hover:bg-indigo-700 transition">
+                            저장
+                        </button>
+                        <button id="clear-kakao-btn" class="bg-red-600 text-white px-4 py-3 rounded hover:bg-red-700 transition">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-2 text-xs text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        API 키는 암호화되어 안전하게 저장됩니다. 
+                        <a href="https://developers.kakao.com/" target="_blank" class="text-indigo-600 hover:underline">
+                            카카오 개발자센터에서 발급받으세요.
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 알라딘 API 키 (선택사항) -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h3 class="font-medium text-gray-800">알라딘 API (선택사항)</h3>
+                            <p class="text-sm text-gray-600">장바구니 기능에 필요한 API 키입니다.</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span id="aladin-status" class="px-2 py-1 text-xs rounded font-medium bg-gray-100 text-gray-600">
+                                <i class="fas fa-question-circle mr-1"></i>확인 중
+                            </span>
+                            <button id="test-aladin-btn" class="text-indigo-600 hover:text-indigo-800 text-sm">
+                                <i class="fas fa-play"></i> 테스트
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <input 
+                            type="password" 
+                            id="aladin-api-key" 
+                            placeholder="알라딘 API 키를 입력하세요 (선택사항)"
+                            class="flex-1 p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        >
+                        <button id="save-aladin-btn" class="bg-indigo-600 text-white px-6 py-3 rounded hover:bg-indigo-700 transition">
+                            저장
+                        </button>
+                        <button id="clear-aladin-btn" class="bg-red-600 text-white px-4 py-3 rounded hover:bg-red-700 transition">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-2 text-xs text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <a href="http://www.aladin.co.kr/ttb/wapi_guide.aspx" target="_blank" class="text-indigo-600 hover:underline">
+                            알라딘 Open API에서 발급받으세요.
+                        </a>
+                    </div>
+                </div>
+
+                <!-- API 키 백업/복원 -->
+                <div class="border-t pt-6">
+                    <h3 class="font-medium text-gray-800 mb-3">API 키 백업 및 복원</h3>
+                    <div class="flex space-x-4">
+                        <button id="export-api-keys-btn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+                            <i class="fas fa-download mr-2"></i>설정 내보내기
+                        </button>
+                        <button id="import-api-keys-btn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                            <i class="fas fa-upload mr-2"></i>설정 가져오기
+                        </button>
+                        <input type="file" id="import-file-input" accept=".json" class="hidden">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        설정을 안전하게 백업하고 다른 시스템으로 이전할 수 있습니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- API 사용 통계 -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-chart-bar text-indigo-600 mr-2"></i>
+                    API 사용 현황
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-blue-600">오늘 검색 요청</p>
+                                <p class="text-2xl font-bold text-blue-800" id="today-requests">0</p>
+                            </div>
+                            <i class="fas fa-search text-blue-400 text-2xl"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-green-600">이번 달 총 요청</p>
+                                <p class="text-2xl font-bold text-green-800" id="month-requests">0</p>
+                            </div>
+                            <i class="fas fa-calendar text-green-400 text-2xl"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-purple-600">마지막 요청</p>
+                                <p class="text-sm font-medium text-purple-800" id="last-request">없음</p>
+                            </div>
+                            <i class="fas fa-clock text-purple-400 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 학급 관리 탭 (기존 내용) -->
+        <div id="class-management" class="tab-content hidden">
+            <!-- 기존 학급 관리 내용이 여기에 들어감 -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">학급 관리</h2>
+                <p class="text-gray-600">학급 관리 기능은 기존 admin.html 내용을 참조하세요.</p>
+            </div>
+        </div>
+
+        <!-- 데이터 내보내기 탭 (기존 내용) -->
+        <div id="export-management" class="tab-content hidden">
+            <!-- 기존 내보내기 내용이 여기에 들어감 -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">데이터 내보내기</h2>
+                <p class="text-gray-600">데이터 내보내기 기능은 기존 admin.html 내용을 참조하세요.</p>
+            </div>
+        </div>
+
+        <!-- 로딩 표시 -->
+        <div id="loading" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                <p class="text-gray-600">처리 중...</p>
+            </div>
+        </div>
+
+        <!-- 성공 메시지 -->
+        <div id="success-message" class="hidden fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow-lg z-50">
+            <span id="success-text"></span>
+        </div>
+
+        <!-- 에러 메시지 -->
+        <div id="error-message" class="hidden fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded shadow-lg z-50">
+            <span id="error-text"></span>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="../js/config.js?v=2"></script>
+    <script src="../js/api-client.js?v=2"></script>
+    <script src="../js/aladin-api.js?v=2"></script>
+    <script src="../js/ui-components.js?v=2"></script>
+    <script src="../js/admin.js?v=2"></script>
+</body>
+</html>

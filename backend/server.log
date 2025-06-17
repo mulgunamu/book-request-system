@@ -1,0 +1,27 @@
+nohup: 입력 무시
+⏰ 자동 백업 스케줄러 시작됨 (6시간 간격)
+classes.json 파일이 업데이트되었습니다.
+🔄 초기 백업 생성 중...
+✅ 수동 백업 생성: 2025-06-07T09-26-41-934Z_manual_full (7개 파일)
+🗑️ 백업 삭제 완료: 2025-06-07T09-26-12-684Z_manual_full
+🧹 오래된 백업 1개 정리 완료
+node:events:495
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use 0.0.0.0:3000
+    at Server.setupListenHandle [as _listen2] (node:net:1817:16)
+    at listenInCluster (node:net:1865:12)
+    at doListen (node:net:2014:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1844:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '0.0.0.0',
+  port: 3000
+}
+
+Node.js v18.20.8

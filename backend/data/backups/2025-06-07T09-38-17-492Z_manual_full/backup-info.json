@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-06-07T09:38:17.495Z",
+  "type": "manual",
+  "description": "서버 시작 백업",
+  "files": [
+    "owned-books.json",
+    "classes.json",
+    "applications.json",
+    "api-keys.json",
+    "admin.json",
+    "budgets.json",
+    "system-config.json"
+  ],
+  "totalFiles": 7
+}

@@ -1,0 +1,12 @@
+{
+    "sshfs.configs": [
+        {
+            "name": "koowoo.kr",
+            "host": "koowoo.kr",
+            "port": 22,
+            "username": "book",
+            "password": "cor9109*!",
+            "root": "/home/book/public_html"
+        }
+    ]
+}

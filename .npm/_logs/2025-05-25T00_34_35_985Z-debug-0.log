@@ -1,0 +1,158 @@
+0 verbose cli /usr/bin/node /usr/bin/npm
+1 info using npm@10.8.2
+2 info using node@v18.20.8
+3 silly config load:file:/usr/lib/node_modules/npm/npmrc
+4 silly config load:file:/home/book/backend/.npmrc
+5 silly config load:file:/home/book/.npmrc
+6 silly config load:file:/usr/etc/npmrc
+7 verbose title npm install express cors node-fetch
+8 verbose argv "install" "express" "cors" "node-fetch"
+9 verbose logfile logs-max:10 dir:/home/book/.npm/_logs/2025-05-25T00_34_35_985Z-
+10 verbose logfile /home/book/.npm/_logs/2025-05-25T00_34_35_985Z-debug-0.log
+11 silly packumentCache heap:513277952 maxSize:128319488 maxEntrySize:64159744
+12 silly logfile done cleaning log files
+13 silly idealTree buildDeps
+14 silly fetch manifest cors@^2.8.5
+15 silly packumentCache full:https://registry.npmjs.org/cors cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/cors 190ms (cache revalidated)
+17 silly packumentCache full:https://registry.npmjs.org/cors set size:73833 disposed:false
+18 silly fetch manifest express@^5.1.0
+19 silly packumentCache full:https://registry.npmjs.org/express cache-miss
+20 http fetch GET 200 https://registry.npmjs.org/express 33ms (cache revalidated)
+21 silly packumentCache full:https://registry.npmjs.org/express set size:787031 disposed:false
+22 silly fetch manifest node-fetch@*
+23 silly packumentCache full:https://registry.npmjs.org/node-fetch cache-miss
+24 http fetch GET 200 https://registry.npmjs.org/node-fetch 111ms (cache miss)
+25 silly packumentCache full:https://registry.npmjs.org/node-fetch set size:undefined disposed:false
+26 silly placeDep ROOT cors@2.8.5 REPLACE for: backend@1.0.0 want: ^2.8.5
+27 silly placeDep ROOT express@5.1.0 REPLACE for: backend@1.0.0 want: ^5.1.0
+28 silly placeDep ROOT node-fetch@3.3.2 OK for: backend@1.0.0 want: *
+29 silly fetch manifest data-uri-to-buffer@^4.0.0
+30 silly packumentCache full:https://registry.npmjs.org/data-uri-to-buffer cache-miss
+31 http fetch GET 200 https://registry.npmjs.org/data-uri-to-buffer 73ms (cache miss)
+32 silly packumentCache full:https://registry.npmjs.org/data-uri-to-buffer set size:undefined disposed:false
+33 silly fetch manifest fetch-blob@^3.1.4
+34 silly packumentCache full:https://registry.npmjs.org/fetch-blob cache-miss
+35 http fetch GET 200 https://registry.npmjs.org/fetch-blob 34ms (cache miss)
+36 silly packumentCache full:https://registry.npmjs.org/fetch-blob set size:undefined disposed:false
+37 silly fetch manifest formdata-polyfill@^4.0.10
+38 silly packumentCache full:https://registry.npmjs.org/formdata-polyfill cache-miss
+39 http fetch GET 200 https://registry.npmjs.org/formdata-polyfill 34ms (cache miss)
+40 silly packumentCache full:https://registry.npmjs.org/formdata-polyfill set size:undefined disposed:false
+41 silly placeDep ROOT data-uri-to-buffer@4.0.1 OK for: node-fetch@3.3.2 want: ^4.0.0
+42 silly placeDep ROOT fetch-blob@3.2.0 OK for: node-fetch@3.3.2 want: ^3.1.4
+43 silly placeDep ROOT formdata-polyfill@4.0.10 OK for: node-fetch@3.3.2 want: ^4.0.10
+44 silly fetch manifest node-domexception@^1.0.0
+45 silly packumentCache full:https://registry.npmjs.org/node-domexception cache-miss
+46 http fetch GET 200 https://registry.npmjs.org/node-domexception 28ms (cache miss)
+47 silly packumentCache full:https://registry.npmjs.org/node-domexception set size:undefined disposed:false
+48 silly fetch manifest web-streams-polyfill@^3.0.3
+49 silly packumentCache full:https://registry.npmjs.org/web-streams-polyfill cache-miss
+50 http fetch GET 200 https://registry.npmjs.org/web-streams-polyfill 32ms (cache miss)
+51 silly packumentCache full:https://registry.npmjs.org/web-streams-polyfill set size:undefined disposed:false
+52 silly placeDep ROOT node-domexception@1.0.0 OK for: fetch-blob@3.2.0 want: ^1.0.0
+53 silly placeDep ROOT web-streams-polyfill@3.3.3 OK for: fetch-blob@3.2.0 want: ^3.0.3
+54 silly reify moves {}
+55 silly audit bulk request {
+55 silly audit   accepts: [ '2.0.0' ],
+55 silly audit   'body-parser': [ '2.2.0' ],
+55 silly audit   bytes: [ '3.1.2' ],
+55 silly audit   'call-bind-apply-helpers': [ '1.0.2' ],
+55 silly audit   'call-bound': [ '1.0.4' ],
+55 silly audit   'content-disposition': [ '1.0.0' ],
+55 silly audit   'content-type': [ '1.0.5' ],
+55 silly audit   cookie: [ '0.7.2' ],
+55 silly audit   'cookie-signature': [ '1.2.2' ],
+55 silly audit   debug: [ '4.4.1' ],
+55 silly audit   depd: [ '2.0.0' ],
+55 silly audit   'dunder-proto': [ '1.0.1' ],
+55 silly audit   'ee-first': [ '1.1.1' ],
+55 silly audit   encodeurl: [ '2.0.0' ],
+55 silly audit   'es-define-property': [ '1.0.1' ],
+55 silly audit   'es-errors': [ '1.3.0' ],
+55 silly audit   'es-object-atoms': [ '1.1.1' ],
+55 silly audit   'escape-html': [ '1.0.3' ],
+55 silly audit   etag: [ '1.8.1' ],
+55 silly audit   finalhandler: [ '2.1.0' ],
+55 silly audit   forwarded: [ '0.2.0' ],
+55 silly audit   fresh: [ '2.0.0' ],
+55 silly audit   'function-bind': [ '1.1.2' ],
+55 silly audit   'get-intrinsic': [ '1.3.0' ],
+55 silly audit   'get-proto': [ '1.0.1' ],
+55 silly audit   gopd: [ '1.2.0' ],
+55 silly audit   'has-symbols': [ '1.1.0' ],
+55 silly audit   hasown: [ '2.0.2' ],
+55 silly audit   'http-errors': [ '2.0.0' ],
+55 silly audit   'iconv-lite': [ '0.6.3' ],
+55 silly audit   inherits: [ '2.0.4' ],
+55 silly audit   'ipaddr.js': [ '1.9.1' ],
+55 silly audit   'is-promise': [ '4.0.0' ],
+55 silly audit   'math-intrinsics': [ '1.1.0' ],
+55 silly audit   'media-typer': [ '1.1.0' ],
+55 silly audit   'merge-descriptors': [ '2.0.0' ],
+55 silly audit   'mime-db': [ '1.54.0' ],
+55 silly audit   'mime-types': [ '3.0.1' ],
+55 silly audit   ms: [ '2.1.3' ],
+55 silly audit   negotiator: [ '1.0.0' ],
+55 silly audit   'object-assign': [ '4.1.1' ],
+55 silly audit   'object-inspect': [ '1.13.4' ],
+55 silly audit   'on-finished': [ '2.4.1' ],
+55 silly audit   once: [ '1.4.0' ],
+55 silly audit   parseurl: [ '1.3.3' ],
+55 silly audit   'path-to-regexp': [ '8.2.0' ],
+55 silly audit   'proxy-addr': [ '2.0.7' ],
+55 silly audit   qs: [ '6.14.0' ],
+55 silly audit   'range-parser': [ '1.2.1' ],
+55 silly audit   'raw-body': [ '3.0.0' ],
+55 silly audit   router: [ '2.2.0' ],
+55 silly audit   'safe-buffer': [ '5.2.1' ],
+55 silly audit   'safer-buffer': [ '2.1.2' ],
+55 silly audit   send: [ '1.2.0' ],
+55 silly audit   'serve-static': [ '2.2.0' ],
+55 silly audit   setprototypeof: [ '1.2.0' ],
+55 silly audit   'side-channel': [ '1.1.0' ],
+55 silly audit   'side-channel-list': [ '1.0.0' ],
+55 silly audit   'side-channel-map': [ '1.0.1' ],
+55 silly audit   'side-channel-weakmap': [ '1.0.2' ],
+55 silly audit   statuses: [ '2.0.1' ],
+55 silly audit   toidentifier: [ '1.0.1' ],
+55 silly audit   'type-is': [ '2.0.1' ],
+55 silly audit   unpipe: [ '1.0.0' ],
+55 silly audit   vary: [ '1.1.2' ],
+55 silly audit   wrappy: [ '1.0.2' ],
+55 silly audit   cors: [ '2.8.5' ],
+55 silly audit   express: [ '5.1.0' ],
+55 silly audit   'node-fetch': [ '3.3.2' ],
+55 silly audit   'data-uri-to-buffer': [ '4.0.1' ],
+55 silly audit   'fetch-blob': [ '3.2.0' ],
+55 silly audit   'formdata-polyfill': [ '4.0.10' ],
+55 silly audit   'node-domexception': [ '1.0.0' ],
+55 silly audit   'web-streams-polyfill': [ '3.3.3' ]
+55 silly audit }
+56 silly tarball no local data for web-streams-polyfill@https://registry.npmjs.org/web-streams-polyfill/-/web-streams-polyfill-3.3.3.tgz. Extracting by manifest.
+57 silly tarball no local data for node-domexception@https://registry.npmjs.org/node-domexception/-/node-domexception-1.0.0.tgz. Extracting by manifest.
+58 silly tarball no local data for formdata-polyfill@https://registry.npmjs.org/formdata-polyfill/-/formdata-polyfill-4.0.10.tgz. Extracting by manifest.
+59 silly tarball no local data for fetch-blob@https://registry.npmjs.org/fetch-blob/-/fetch-blob-3.2.0.tgz. Extracting by manifest.
+60 silly tarball no local data for data-uri-to-buffer@https://registry.npmjs.org/data-uri-to-buffer/-/data-uri-to-buffer-4.0.1.tgz. Extracting by manifest.
+61 silly tarball no local data for node-fetch@https://registry.npmjs.org/node-fetch/-/node-fetch-3.3.2.tgz. Extracting by manifest.
+62 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 234ms
+63 silly audit report {}
+64 http fetch GET 200 https://registry.npmjs.org/formdata-polyfill/-/formdata-polyfill-4.0.10.tgz 234ms (cache miss)
+65 http fetch GET 200 https://registry.npmjs.org/data-uri-to-buffer/-/data-uri-to-buffer-4.0.1.tgz 236ms (cache miss)
+66 http fetch GET 200 https://registry.npmjs.org/fetch-blob/-/fetch-blob-3.2.0.tgz 239ms (cache miss)
+67 http fetch GET 200 https://registry.npmjs.org/node-domexception/-/node-domexception-1.0.0.tgz 273ms (cache miss)
+68 warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+69 http fetch GET 200 https://registry.npmjs.org/node-fetch/-/node-fetch-3.3.2.tgz 277ms (cache miss)
+70 http fetch GET 200 https://registry.npmjs.org/web-streams-polyfill/-/web-streams-polyfill-3.3.3.tgz 372ms (cache miss)
+71 silly ADD node_modules/web-streams-polyfill
+72 silly ADD node_modules/node-domexception
+73 silly ADD node_modules/formdata-polyfill
+74 silly ADD node_modules/fetch-blob
+75 silly ADD node_modules/data-uri-to-buffer
+76 silly ADD node_modules/node-fetch
+77 verbose cwd /home/book/backend
+78 verbose os Linux 6.1.0-35-amd64
+79 verbose node v18.20.8
+80 verbose npm  v10.8.2
+81 verbose exit 0
+82 info ok

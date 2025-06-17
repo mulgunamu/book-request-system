@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>신청 도서 목록 - 교내 희망도서 신청시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 헤더 -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center text-blue-600 hover:text-blue-700">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        <i class="fas fa-book-open text-2xl mr-3"></i>
+                        <h1 class="text-xl font-bold text-gray-900">신청 도서 목록</h1>
+                    </a>
+                </div>
+                <nav class="flex space-x-4">
+                    <a href="index.html" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-search mr-1"></i>도서검색
+                    </a>
+                    <a href="admin/index.html" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-cog mr-1"></i>관리자
+                    </a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 학급 인증 섹션 -->
+        <div id="authSection" class="bg-white rounded-lg shadow-sm p-6 mb-8">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                <i class="fas fa-lock text-blue-600 mr-2"></i>학급 인증
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label for="grade" class="block text-sm font-medium text-gray-700 mb-1">학년</label>
+                    <select id="grade" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">학년 선택</option>
+                        <option value="1">1학년</option>
+                        <option value="2">2학년</option>
+                        <option value="3">3학년</option>
+                        <option value="4">4학년</option>
+                        <option value="5">5학년</option>
+                        <option value="6">6학년</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="class" class="block text-sm font-medium text-gray-700 mb-1">반</label>
+                    <select id="class" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">반 선택</option>
+                        <!-- 학년 선택 시 동적으로 로드됩니다 -->
+                    </select>
+                </div>
+                <div>
+                    <label for="teacher" class="block text-sm font-medium text-gray-700 mb-1">담임교사</label>
+                    <input type="text" id="teacher" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="담임교사 이름 입력">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
+                    <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="class11^^">
+                </div>
+                <div class="flex items-end">
+                    <button id="authenticateBtn" class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-key mr-1"></i>인증
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mt-3 text-sm text-gray-600">
+                <i class="fas fa-info-circle mr-1"></i>
+                비밀번호는 담임 선생님께 문의하세요. (예: 1학년 1반 → class11^^)
+            </div>
+        </div>
+
+        <!-- 메인 콘텐츠 (인증 후 표시) -->
+        <div id="mainContent" class="hidden">
+            <!-- 학급 정보 및 예산 현황 -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                    <div class="mb-4 lg:mb-0">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-2">
+                            <i class="fas fa-list text-blue-600 mr-2"></i>신청 현황
+                        </h2>
+                        <div id="classDisplay" class="text-gray-600">
+                            학급 정보를 불러오는 중...
+                        </div>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg p-4 lg:w-96">
+                        <h3 class="font-semibold text-blue-900 mb-2">예산 현황</h3>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span>사용 금액:</span>
+                            <span id="usedBudget" class="font-medium">0원</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span>총 예산:</span>
+                            <span id="totalBudget" class="font-medium">500,000원</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-3">
+                            <span>잔여 예산:</span>
+                            <span id="remainingBudget" class="font-medium text-green-600">500,000원</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div id="budgetBar" class="bg-blue-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <div class="text-xs text-gray-600 mt-1">
+                            <span id="budgetPercentage">0</span>% 사용
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 필터 및 액션 -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex items-center space-x-4">
+                        <div class="text-sm text-gray-600">
+                            총 <span id="totalApplications" class="font-medium text-blue-600">0</span>권 신청
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            총 <span id="totalAmount" class="font-medium text-blue-600">0</span>원
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-3">
+                        <select id="filterBy" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            <option value="all">전체</option>
+                            <option value="student">학생용</option>
+                            <option value="teacher">교사용</option>
+                        </select>
+                        
+                        <select id="sortBy" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            <option value="recent">최근 신청순</option>
+                            <option value="title">도서명순</option>
+                            <option value="price">가격순</option>
+                        </select>
+                        
+                        <button id="exportBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm">
+                            <i class="fas fa-download mr-1"></i>내보내기
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 신청 도서 목록 -->
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    도서 정보
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    저자/출판사
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    가격
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    구분
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    신청일
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    액션
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicationsTable" class="bg-white divide-y divide-gray-200">
+                            <!-- 신청 목록이 여기에 동적으로 추가됩니다 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 빈 상태 -->
+            <div id="emptyState" class="hidden text-center py-12">
+                <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">신청한 도서가 없습니다</h3>
+                <p class="text-gray-600 mb-4">도서를 검색하여 신청해보세요.</p>
+                <a href="index.html" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                    <i class="fas fa-search mr-2"></i>도서 검색하기
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 삭제 확인 모달 -->
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mr-3"></i>
+                    <h3 class="text-lg font-semibold text-gray-900">신청 취소 확인</h3>
+                </div>
+                
+                <p class="text-gray-600 mb-6">
+                    선택한 도서의 신청을 취소하시겠습니까?<br>
+                    취소된 신청은 복구할 수 없습니다.
+                </p>
+                
+                <div class="flex justify-end space-x-3">
+                    <button id="cancelDelete" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                        취소
+                    </button>
+                    <button id="confirmDelete" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                        신청 취소
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 알림 토스트 -->
+    <div id="toast" class="fixed top-4 right-4 max-w-sm w-full hidden z-50">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i id="toastIcon" class="text-xl"></i>
+                </div>
+                <div class="ml-3 w-0 flex-1">
+                    <p id="toastTitle" class="text-sm font-medium text-gray-900"></p>
+                    <p id="toastMessage" class="mt-1 text-sm text-gray-500"></p>
+                </div>
+                <div class="ml-4 flex-shrink-0 flex">
+                    <button id="closeToast" class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/api-client.js"></script>
+    <script>
+        /**
+         * 신청 목록 페이지 애플리케이션
+         */
+        class ApplicationsApp {
+            constructor() {
+                this.currentClass = null;
+                this.applications = [];
+                this.filteredApplications = [];
+                this.deleteTargetId = null;
+                this.isAuthenticated = false;
+                
+                this.elements = {};
+            }
+
+            async init() {
+                this.bindElements();
+                this.bindEvents();
+                // 세션스토리지 기반 인증 유지
+                await this.checkSessionAuth();
+            }
+
+            bindElements() {
+                this.elements = {
+                    // 인증 관련
+                    authSection: document.getElementById('authSection'),
+                    mainContent: document.getElementById('mainContent'),
+                    grade: document.getElementById('grade'),
+                    class: document.getElementById('class'),
+                    teacher: document.getElementById('teacher'),
+                    password: document.getElementById('password'),
+                    authenticateBtn: document.getElementById('authenticateBtn'),
+                    
+                    // 기존 요소들
+                    classDisplay: document.getElementById('classDisplay'),
+                    usedBudget: document.getElementById('usedBudget'),
+                    totalBudget: document.getElementById('totalBudget'),
+                    remainingBudget: document.getElementById('remainingBudget'),
+                    budgetBar: document.getElementById('budgetBar'),
+                    budgetPercentage: document.getElementById('budgetPercentage'),
+                    
+                    totalApplications: document.getElementById('totalApplications'),
+                    totalAmount: document.getElementById('totalAmount'),
+                    filterBy: document.getElementById('filterBy'),
+                    sortBy: document.getElementById('sortBy'),
+                    exportBtn: document.getElementById('exportBtn'),
+                    
+                    applicationsTable: document.getElementById('applicationsTable'),
+                    emptyState: document.getElementById('emptyState'),
+                    
+                    deleteModal: document.getElementById('deleteModal'),
+                    cancelDelete: document.getElementById('cancelDelete'),
+                    confirmDelete: document.getElementById('confirmDelete')
+                };
+            }
+
+            bindEvents() {
+                // 인증 관련 이벤트
+                this.elements.grade.addEventListener('change', () => this.loadClassList());
+                this.elements.authenticateBtn.addEventListener('click', () => this.authenticateClass());
+                this.elements.password.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.authenticateClass();
+                    }
+                });
+                
+                // 기존 이벤트들
+                this.elements.filterBy.addEventListener('change', () => this.applyFilters());
+                this.elements.sortBy.addEventListener('change', () => this.applyFilters());
+                this.elements.exportBtn.addEventListener('click', () => this.exportApplications());
+                
+                this.elements.applicationsTable.addEventListener('click', (e) => {
+                    if (e.target.closest('.delete-btn')) {
+                        const applicationId = e.target.closest('.delete-btn').dataset.id;
+                        this.showDeleteConfirm(applicationId);
+                    }
+                });
+                
+                this.elements.cancelDelete.addEventListener('click', () => this.hideDeleteConfirm());
+                this.elements.confirmDelete.addEventListener('click', () => this.deleteApplication());
+                
+                // 모달 배경 클릭으로 닫기
+                this.elements.deleteModal.addEventListener('click', (e) => {
+                    if (e.target === this.elements.deleteModal) {
+                        this.hideDeleteConfirm();
+                    }
+                });
+            }
+
+            // 세션스토리지 기반 인증 확인
+            async checkSessionAuth() {
+                // URL에서 force=true 파라미터 확인
+                const urlParams = new URLSearchParams(window.location.search);
+                const forceAuth = urlParams.get('force') === 'true';
+                
+                if (forceAuth) {
+                    // force=true인 경우 URL의 학년/반 정보 사용
+                    const grade = urlParams.get('grade');
+                    const classNum = urlParams.get('class');
+                    if (grade && classNum) {
+                        const classId = `${grade}-${classNum}`;
+                        // 서버에서 학급 정보 조회
+                        const response = await fetch('/api/classes/settings');
+                        if (response.ok) {
+                            const classSettings = await response.json();
+                            const classData = classSettings.find(cls => cls.classId === classId);
+                            if (classData) {
+                                // force=true일 때는 세션스토리지의 인증 정보를 무시하고 URL의 학급 정보 사용
+                                this.currentClass = classData;
+                                this.isAuthenticated = true;
+                                this.showMainContent();
+                                this.loadClassInfo();
+                                await this.loadApplications();
+                                return;
+                            }
+                        }
+                    }
+                    // force=true인데 URL 정보가 유효하지 않으면 인증 섹션 표시
+                    this.showAuthSection();
+                    return;
+                }
+
+                // force=true가 아닌 경우에만 세션스토리지 기반 인증 확인
+                const authInfo = JSON.parse(sessionStorage.getItem('classAuth') || 'null');
+                if (authInfo && authInfo.classId && authInfo.expiry > Date.now()) {
+                    // 서버에서 학급 정보 조회
+                    const response = await fetch('/api/classes/settings');
+                    if (response.ok) {
+                        const classSettings = await response.json();
+                        const classData = classSettings.find(cls => cls.classId === authInfo.classId);
+                        if (classData) {
+                            this.currentClass = classData;
+                            this.isAuthenticated = true;
+                            this.showMainContent();
+                            this.loadClassInfo();
+                            await this.loadApplications();
+                            return;
+                        }
+                    }
+                }
+                // 인증 정보가 없거나 만료됨
+                sessionStorage.removeItem('classAuth');
+                this.showAuthSection();
+            }
+
+            // 학급 목록 로드
+            async loadClassList() {
+                const grade = this.elements.grade.value;
+                if (!grade) {
+                    this.elements.class.innerHTML = '<option value="">반 선택</option>';
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/classes/settings');
+                    if (!response.ok) throw new Error('학급 목록을 불러올 수 없습니다.');
+                    
+                    const classes = await response.json();
+                    const gradeClasses = classes.filter(cls => cls.grade == grade);
+                    
+                    this.elements.class.innerHTML = '<option value="">반 선택</option>' +
+                        gradeClasses.map(cls => 
+                            `<option value="${cls.grade}-${cls.class}">${cls.class}반</option>`
+                        ).join('');
+                        
+                } catch (error) {
+                    console.error('학급 목록 로드 오류:', error);
+                    Toast.show('오류', '학급 목록을 불러올 수 없습니다.', 'error');
+                }
+            }
+
+            // 학급 인증
+            async authenticateClass() {
+                let classId = getClassIdFromQuery();
+                if (!classId) {
+                    const grade = this.elements.grade.value;
+                    const classNum = this.elements.class.value;
+                    if (!grade || !classNum) {
+                        Toast.show('입력 오류', '학년, 반을 모두 선택해주세요.', 'warning');
+                        return;
+                    }
+                    // classNum이 이미 '1-1' 형태라면 그대로 사용, 아니면 조합
+                    if (/^\d-\d$/.test(classNum)) {
+                        classId = classNum;
+                    } else {
+                        classId = `${grade}-${classNum}`;
+                    }
+                }
+                // 이미 인증된 학급이면 인증 모달 없이 바로 인증 처리
+                const authInfo = JSON.parse(sessionStorage.getItem('classAuth') || 'null');
+                if (authInfo && authInfo.classId === classId && authInfo.expiry > Date.now()) {
+                    // 서버에서 학급 정보 fetch 후 UI 갱신
+                    const response = await fetch('/api/classes/settings');
+                    if (response.ok) {
+                        const classSettings = await response.json();
+                        const classData = classSettings.find(cls => cls.classId === classId);
+                        if (classData) {
+                            this.currentClass = classData;
+                            this.isAuthenticated = true;
+                            this.showMainContent();
+                            this.loadClassInfo();
+                            await this.loadApplications();
+                            return;
+                        }
+                    }
+                }
+                // 인증이 안 된 학급이거나 만료된 경우에만 인증 모달/로직 진행
+                const password = this.elements.password.value;
+                if (!password) {
+                    Toast.show('입력 오류', '비밀번호를 입력해주세요.', 'warning');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/classes/authenticate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            classId: classId,
+                            password: password
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        // 인증 성공
+                        this.currentClass = result.classInfo;
+                        this.isAuthenticated = true;
+                        // 세션스토리지에 인증 정보 저장 (2시간 유지)
+                        sessionStorage.setItem('classAuth', JSON.stringify({
+                            classId: classId,
+                            expiry: Date.now() + (2 * 60 * 60 * 1000)
+                        }));
+                        Toast.show('인증 성공', `${classId} 학급으로 인증되었습니다.`, 'success');
+                        location.reload(); // 인증 성공 후 새로고침
+                        return;
+                    } else {
+                        Toast.show('인증 실패', result.error || '인증에 실패했습니다.', 'error');
+                    }
+                } catch (error) {
+                    console.error('인증 오류:', error);
+                    Toast.show('오류', '인증 중 오류가 발생했습니다.', 'error');
+                }
+            }
+
+            // 인증 섹션 표시
+            showAuthSection() {
+                this.elements.authSection.classList.remove('hidden');
+                this.elements.mainContent.classList.add('hidden');
+            }
+
+            // 메인 콘텐츠 표시
+            showMainContent() {
+                this.elements.authSection.classList.add('hidden');
+                this.elements.mainContent.classList.remove('hidden');
+            }
+
+            loadClassInfo() {
+                if (this.currentClass) {
+                    this.elements.classDisplay.innerHTML = `
+                        <div class="flex items-center space-x-4">
+                            <div class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                                ${this.currentClass.grade}학년 ${this.currentClass.class}반
+                            </div>
+                            <div>
+                                <span class="text-gray-600">담임:</span>
+                                <span class="font-medium">${this.currentClass.teacher || '담임 미배정'}</span>
+                            </div>
+                        </div>
+                    `;
+                    this.updateBudgetDisplay();
+                }
+            }
+
+            // 학급별 신청 목록 로드
+            async loadApplications() {
+                if (!this.currentClass) {
+                    this.showEmptyState();
+                    return;
+                }
+
+                this.applications = await Applications.getByClass(this.currentClass.classId);
+                this.applyFilters();
+            }
+
+            applyFilters() {
+                let filtered = [...this.applications];
+                
+                // 필터 적용
+                const filterBy = this.elements.filterBy.value;
+                if (filterBy === 'student') {
+                    filtered = filtered.filter(app => !app.isTeacherBook);
+                } else if (filterBy === 'teacher') {
+                    filtered = filtered.filter(app => app.isTeacherBook);
+                }
+                
+                // 정렬 적용
+                const sortBy = this.elements.sortBy.value;
+                filtered.sort((a, b) => {
+                    switch (sortBy) {
+                        case 'title':
+                            return a.title.localeCompare(b.title);
+                        case 'price':
+                            return b.price - a.price;
+                        case 'recent':
+                        default:
+                            return new Date(b.appliedAt) - new Date(a.appliedAt);
+                    }
+                });
+                
+                this.filteredApplications = filtered;
+                this.displayApplications();
+                this.updateStats();
+            }
+
+            displayApplications() {
+                if (this.filteredApplications.length === 0) {
+                    this.showEmptyState();
+                    return;
+                }
+
+                this.elements.emptyState.classList.add('hidden');
+                this.elements.applicationsTable.innerHTML = this.filteredApplications.map(app => this.createApplicationRow(app)).join('');
+                
+                // cover 필드가 없는 신청들의 이미지를 실시간 로드
+                this.loadMissingCovers();
+            }
+
+            createApplicationRow(application) {
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-16 w-12">
+                                    ${application.cover ? `
+                                        <img src="${application.cover}" 
+                                             alt="${Validator.escapeHtml(application.title)}" 
+                                             class="h-16 w-12 object-cover rounded shadow-sm"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div class="h-16 w-12 bg-blue-100 rounded flex items-center justify-center" style="display: none;">
+                                            <i class="fas fa-book text-blue-600 text-sm"></i>
+                                        </div>
+                                    ` : `
+                                        <div class="book-cover-container h-16 w-12 bg-blue-100 rounded flex items-center justify-center" data-isbn="${application.isbn}">
+                                            <i class="fas fa-book text-blue-600 text-sm"></i>
+                                        </div>
+                                    `}
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900 max-w-xs truncate" title="${Validator.escapeHtml(application.title)}">
+                                        ${Validator.escapeHtml(application.title)}
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        ISBN: ${application.isbn}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${Validator.escapeHtml(application.author)}</div>
+                            <div class="text-sm text-gray-500">${Validator.escapeHtml(application.publisher)}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${formatPrice(application.price)}원</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.isTeacherBook ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}">
+                                ${application.isTeacherBook ? '교사용' : '학생용'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${formatDate(application.appliedAt)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button class="delete-btn text-red-600 hover:text-red-900 transition" data-id="${application.id}">
+                                <i class="fas fa-trash mr-1"></i>취소
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            updateStats() {
+                const totalCount = this.filteredApplications.length;
+                const totalAmount = this.filteredApplications.reduce((sum, app) => sum + app.price, 0);
+                
+                this.elements.totalApplications.textContent = totalCount;
+                this.elements.totalAmount.textContent = formatPrice(totalAmount);
+            }
+
+            async updateBudgetDisplay() {
+                if (!this.currentClass) return;
+
+                // 1. 신청 목록 서버에서 가져오기
+                const applications = await Applications.getByClass(this.currentClass.classId);
+                const used = applications.reduce((sum, app) => sum + (app.price || 0), 0);
+
+                // 2. 예산 서버에서 가져오기
+                const response = await fetch('/api/classes/settings');
+                let total = 0;
+                if (response.ok) {
+                    const classSettings = await response.json();
+                    const classData = classSettings.find(cls => cls.classId === this.currentClass.classId);
+                    total = classData && typeof classData.budget === 'number' ? classData.budget : 0;
+                }
+
+                const remaining = total - used;
+                const percentage = total > 0 ? Math.round((used / total) * 100) : 0;
+
+                this.elements.usedBudget.textContent = formatPrice(used);
+                this.elements.totalBudget.textContent = formatPrice(total);
+                this.elements.remainingBudget.textContent = formatPrice(remaining);
+                this.elements.budgetPercentage.textContent = percentage;
+                this.elements.budgetBar.style.width = `${percentage}%`;
+
+                // 색상 처리
+                if (percentage > 90) {
+                    this.elements.budgetBar.className = 'bg-red-600 h-3 rounded-full transition-all duration-500';
+                    this.elements.remainingBudget.className = 'font-medium text-red-600';
+                } else if (percentage > 70) {
+                    this.elements.budgetBar.className = 'bg-yellow-600 h-3 rounded-full transition-all duration-500';
+                    this.elements.remainingBudget.className = 'font-medium text-yellow-600';
+                } else {
+                    this.elements.budgetBar.className = 'bg-blue-600 h-3 rounded-full transition-all duration-500';
+                    this.elements.remainingBudget.className = 'font-medium text-green-600';
+                }
+            }
+
+            showDeleteConfirm(applicationId) {
+                this.deleteTargetId = applicationId;
+                Modal.show('deleteModal');
+            }
+
+            hideDeleteConfirm() {
+                this.deleteTargetId = null;
+                Modal.hide('deleteModal');
+            }
+
+            deleteApplication() {
+                if (!this.deleteTargetId) return;
+                
+                const success = Applications.remove(this.deleteTargetId);
+                
+                if (success) {
+                    Toast.show('취소 완료', '도서 신청이 취소되었습니다.', 'success');
+                    this.loadApplications();
+                    this.updateBudgetDisplay();
+                } else {
+                    Toast.show('취소 실패', '신청 취소 중 오류가 발생했습니다.', 'error');
+                }
+                
+                this.hideDeleteConfirm();
+            }
+
+            exportApplications() {
+                if (this.filteredApplications.length === 0) {
+                    Toast.show('내보내기 실패', '내보낼 데이터가 없습니다.', 'warning');
+                    return;
+                }
+
+                const exportData = this.filteredApplications.map(app => ({
+                    '학급': this.currentClass ? `${this.currentClass.grade}학년 ${this.currentClass.class}반` : '',
+                    '담임교사': this.currentClass ? this.currentClass.teacher : '',
+                    '도서명': app.title,
+                    '저자': app.author,
+                    '출판사': app.publisher,
+                    '가격': app.price,
+                    '구분': app.isTeacherBook ? '교사용' : '학생용',
+                    'ISBN': app.isbn,
+                    '신청일': formatDate(app.appliedAt)
+                }));
+
+                const filename = `도서신청목록_${this.currentClass ? this.currentClass.classId : 'unknown'}_${new Date().toISOString().split('T')[0]}.csv`;
+                CSV.download(exportData, filename);
+                
+                Toast.show('내보내기 완료', 'CSV 파일이 다운로드되었습니다.', 'success');
+            }
+
+            showEmptyState() {
+                this.elements.applicationsTable.innerHTML = '';
+                this.elements.emptyState.classList.remove('hidden');
+                this.elements.totalApplications.textContent = '0';
+                this.elements.totalAmount.textContent = '0';
+            }
+
+            /**
+             * cover 필드가 없는 신청들의 이미지를 실시간으로 로드
+             */
+            async loadMissingCovers() {
+                const coverContainers = document.querySelectorAll('.book-cover-container[data-isbn]');
+                
+                for (const container of coverContainers) {
+                    const isbn = container.dataset.isbn;
+                    
+                    try {
+                        // 알라딘 API에서 이미지 URL 가져오기
+                        const coverUrl = await this.fetchBookCover(isbn);
+                        
+                        if (coverUrl) {
+                            container.innerHTML = `
+                                <img src="${coverUrl}" 
+                                     alt="도서 커버" 
+                                     class="h-16 w-12 object-cover rounded shadow-sm"
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\"fas fa-book text-blue-600 text-sm\\"></i>';">
+                            `;
+                        }
+                    } catch (error) {
+                        console.warn(`ISBN ${isbn} 커버 로드 실패:`, error);
+                    }
+                    
+                    // API 호출 간격
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+            }
+
+            /**
+             * 알라딘 API에서 도서 커버 이미지 URL 가져오기
+             */
+            async fetchBookCover(isbn) {
+                try {
+                    // 프록시를 통해 알라딘 API 호출 (CORS 문제 해결)
+                    const response = await fetch('/api/books/cover/' + isbn);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.cover;
+                    }
+                } catch (error) {
+                    console.warn('커버 이미지 조회 실패:', error);
+                }
+                
+                return null;
+            }
+        }
+
+        // 애플리케이션 시작
+        const applicationsApp = new ApplicationsApp();
+        document.addEventListener('DOMContentLoaded', () => {
+            applicationsApp.init();
+        });
+
+        function getClassIdFromQuery() {
+            const params = new URLSearchParams(window.location.search);
+            const grade = params.get('grade');
+            const classNum = params.get('class');
+            if (grade && classNum) {
+                return `${grade}-${classNum}`;
+            }
+            return null;
+        }
+    </script>
+</body>
+</html> 

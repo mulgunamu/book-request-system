@@ -1,0 +1,35 @@
+0 verbose cli /usr/bin/node /usr/bin/npm
+1 info using npm@10.8.2
+2 info using node@v18.20.8
+3 silly config load:file:/usr/lib/node_modules/npm/npmrc
+4 silly config load:file:/home/book/backend/.npmrc
+5 silly config load:file:/home/book/.npmrc
+6 silly config load:file:/usr/etc/npmrc
+7 verbose title npm init
+8 verbose argv "init" "--yes"
+9 verbose logfile logs-max:10 dir:/home/book/.npm/_logs/2025-05-25T00_34_20_596Z-
+10 verbose logfile /home/book/.npm/_logs/2025-05-25T00_34_20_596Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly package data {
+12 silly package data   name: 'backend',
+12 silly package data   version: '1.0.0',
+12 silly package data   main: 'index.js',
+12 silly package data   scripts: {
+12 silly package data     test: 'echo "Error: no test specified" && exit 1',
+12 silly package data     start: 'node server.js'
+12 silly package data   },
+12 silly package data   keywords: [],
+12 silly package data   author: '',
+12 silly package data   license: 'ISC',
+12 silly package data   dependencies: { cors: '^2.8.5', express: '^5.1.0' },
+12 silly package data   devDependencies: {},
+12 silly package data   description: '',
+12 silly package data   [Symbol(newline)]: '\n',
+12 silly package data   [Symbol(indent)]: '  '
+12 silly package data }
+13 verbose cwd /home/book/backend
+14 verbose os Linux 6.1.0-35-amd64
+15 verbose node v18.20.8
+16 verbose npm  v10.8.2
+17 verbose exit 0
+18 info ok

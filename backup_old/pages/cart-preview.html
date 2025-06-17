@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>장바구니 미리보기 - 교내 희망 도서 구매 관리 시스템</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 폰트 어썸 아이콘 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 추가 커스텀 스타일 */
+        .loading {
+            display: none;
+        }
+        .loading.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- 네비게이션 바 -->
+    <nav class="bg-indigo-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-xl font-bold">희망 도서 신청 시스템</a>
+                <div class="flex space-x-4">
+                    <a href="../index.html" class="hover:underline">홈</a>
+                    <a href="class-view.html" class="hover:underline">학급별 신청현황</a>
+                    <a href="all-requests.html" class="hover:underline">전체 신청현황</a>
+                    <a href="admin.html" class="hover:underline">관리자</a>
+                </div>
+                <!-- 모바일 메뉴 버튼 -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-white">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- 모바일 메뉴 -->
+            <div id="mobile-menu" class="hidden md:hidden mt-4 space-y-2">
+                <a href="../index.html" class="block hover:bg-indigo-700 px-2 py-1 rounded">홈</a>
+                <a href="class-view.html" class="block hover:bg-indigo-700 px-2 py-1 rounded">학급별 신청현황</a>
+                <a href="all-requests.html" class="block hover:bg-indigo-700 px-2 py-1 rounded">전체 신청현황</a>
+                <a href="admin.html" class="block hover:bg-indigo-700 px-2 py-1 rounded">관리자</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4">장바구니 미리보기</h1>
+            
+            <!-- 신청자 정보 확인 -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">신청자 정보</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="grade" class="block text-gray-700 mb-1">학년</label>
+                        <input type="text" id="grade" class="w-full p-2 border border-gray-300 rounded bg-gray-100" readonly>
+                    </div>
+                    <div>
+                        <label for="class" class="block text-gray-700 mb-1">반</label>
+                        <input type="text" id="class" class="w-full p-2 border border-gray-300 rounded bg-gray-100" readonly>
+                    </div>
+                    <div>
+                        <label for="teacher" class="block text-gray-700 mb-1">담당 교사</label>
+                        <input type="text" id="teacher" class="w-full p-2 border border-gray-300 rounded bg-gray-100" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 장바구니 통계 -->
+            <div class="mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-indigo-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-indigo-800">총 도서 수</h3>
+                        <p class="text-2xl font-bold mt-2"><span id="total-books">0</span>권</p>
+                    </div>
+                    <div class="bg-indigo-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-indigo-800">선택된 도서</h3>
+                        <p class="text-2xl font-bold mt-2"><span id="selected-books">0</span>권</p>
+                    </div>
+                    <div class="bg-indigo-50 rounded-lg p-4">
+                        <h3 class="font-semibold text-indigo-800">총 금액</h3>
+                        <p class="text-2xl font-bold mt-2" id="total-price">0원</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 도서 목록 -->
+            <div id="book-list-container">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3">도서 목록</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="px-4 py-2 text-left text-gray-700 border-b">선택</th>
+                                <th class="px-4 py-2 text-left text-gray-700 border-b">도서명</th>
+                                <th class="px-4 py-2 text-left text-gray-700 border-b">저자</th>
+                                <th class="px-4 py-2 text-left text-gray-700 border-b">출판사</th>
+                                <th class="px-4 py-2 text-right text-gray-700 border-b">가격</th>
+                                <th class="px-4 py-2 text-center text-gray-700 border-b">중복여부</th>
+                            </tr>
+                        </thead>
+                        <tbody id="book-list">
+                            <!-- 동적으로 채워짐 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- 버튼 그룹 -->
+            <div class="flex justify-between mt-6">
+                <a href="../index.html" class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition">
+                    취소
+                </a>
+                <button id="submit-books-btn" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition">
+                    희망 도서 신청하기
+                </button>
+            </div>
+            
+            <!-- 로딩 표시 -->
+            <div id="loading" class="loading items-center justify-center mt-4">
+                <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-700"></div>
+                <span class="ml-3 text-indigo-700">처리 중...</span>
+            </div>
+            
+            <!-- 에러 메시지 -->
+            <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4">
+                <span id="error-text"></span>
+            </div>
+        </div>
+    </main>
+    
+    <!-- 푸터 -->
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-lg font-bold">교내 희망 도서 구매 관리 시스템</h3>
+                    <p class="text-gray-400">© 2025 All Rights Reserved</p>
+                </div>
+                <div>
+                    <p class="text-gray-400">문의: admin@school.edu</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 자바스크립트 -->
+    <script src="../js/utils.js"></script>
+    <script src="../js/data-manager.js"></script>
+    <script>
+        // DOM이 완전히 로드된 후 실행
+        document.addEventListener('DOMContentLoaded', () => {
+            // 전역 변수
+            let cartBooks = []; // 장바구니 도서 목록
+            
+            // DOM 요소
+            const gradeInput = document.getElementById('grade');
+            const classInput = document.getElementById('class');
+            const teacherInput = document.getElementById('teacher');
+            const totalBooksSpan = document.getElementById('total-books');
+            const selectedBooksSpan = document.getElementById('selected-books');
+            const totalPriceSpan = document.getElementById('total-price');
+            const bookList = document.getElementById('book-list');
+            const submitBooksBtn = document.getElementById('submit-books-btn');
+            
+            /**
+             * 페이지 초기화 함수
+             */
+            const initPage = () => {
+                try {
+                    // URL에서 세션 데이터 가져오기
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const sessionData = urlParams.get('session');
+                    
+                    if (!sessionData) {
+                        // 세션 데이터가 없으면 홈으로 리다이렉트
+                        alert('장바구니 정보가 없습니다.');
+                        window.location.href = '../index.html';
+                        return;
+                    }
+                    
+                    // 세션 데이터 파싱
+                    const sessionObj = JSON.parse(atob(sessionData));
+                    
+                    // 신청자 정보 설정
+                    gradeInput.value = sessionObj.grade + '학년';
+                    classInput.value = sessionObj.class + '반';
+                    teacherInput.value = sessionObj.teacher;
+                    
+                    // 도서 목록 설정
+                    cartBooks = sessionObj.books || [];
+                    
+                    // 도서 목록 표시
+                    renderBooks();
+                    
+                    // 이벤트 리스너 등록
+                    registerEventListeners();
+                } catch (error) {
+                    console.error('페이지 초기화 오류:', error);
+                    Utils.showError('장바구니 정보를 불러오는데 실패했습니다.');
+                }
+            };
+            
+            /**
+             * 이벤트 리스너 등록 함수
+             */
+            const registerEventListeners = () => {
+                // 희망 도서 신청 버튼 클릭
+                submitBooksBtn.addEventListener('click', submitBooks);
+                
+                // 모바일 메뉴 토글
+                document.getElementById('mobile-menu-button').addEventListener('click', function() {
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    mobileMenu.classList.toggle('hidden');
+                });
+            };
+            
+            /**
+             * 도서 목록 렌더링 함수
+             */
+            const renderBooks = () => {
+                // 도서 목록 초기화
+                Utils.clearElement(bookList);
+                
+                // 선택된 도서 수 및 총 금액 계산
+                updateStatistics();
+                
+                // 각 도서에 대한 행 추가
+                cartBooks.forEach((book, index) => {
+                    const row = document.createElement('tr');
+                    row.className = book.isDuplicate ? 'bg-red-50' : '';
+                    
+                    // 선택 셀
+                    const selectCell = document.createElement('td');
+                    selectCell.className = 'px-4 py-2 border-b';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'form-checkbox h-5 w-5 text-indigo-600';
+                    checkbox.checked = book.selected;
+                    checkbox.disabled = book.isDuplicate; // 중복인 경우 선택 비활성화
+                    
+                    checkbox.addEventListener('change', () => {
+                        cartBooks[index].selected = checkbox.checked;
+                        updateStatistics();
+                    });
+                    
+                    selectCell.appendChild(checkbox);
+                    row.appendChild(selectCell);
+                    
+                    // 도서명 셀
+                    const titleCell = document.createElement('td');
+                    titleCell.className = 'px-4 py-2 border-b';
+                    titleCell.textContent = book.title;
+                    row.appendChild(titleCell);
+                    
+                    // 저자 셀
+                    const authorCell = document.createElement('td');
+                    authorCell.className = 'px-4 py-2 border-b';
+                    authorCell.textContent = book.author;
+                    row.appendChild(authorCell);
+                    
+                    // 출판사 셀
+                    const publisherCell = document.createElement('td');
+                    publisherCell.className = 'px-4 py-2 border-b';
+                    publisherCell.textContent = book.publisher;
+                    row.appendChild(publisherCell);
+                    
+                    // 가격 셀
+                    const priceCell = document.createElement('td');
+                    priceCell.className = 'px-4 py-2 border-b text-right';
+                    priceCell.textContent = Utils.formatPrice(book.price);
+                    row.appendChild(priceCell);
+                    
+                    // 중복 여부 셀
+                    const duplicateCell = document.createElement('td');
+                    duplicateCell.className = 'px-4 py-2 border-b text-center';
+                    
+                    if (book.isDuplicate) {
+                        duplicateCell.innerHTML = `<span class="text-red-600 font-semibold">중복</span>`;
+                        if (book.similarBook) {
+                            duplicateCell.innerHTML += `
+                                <div class="text-xs text-gray-500 mt-1">
+                                    유사도: ${Math.round(book.similarityScore * 100)}%
+                                </div>
+                            `;
+                        }
+                    } else {
+                        duplicateCell.textContent = '신규';
+                    }
+                    row.appendChild(duplicateCell);
+                    
+                    // 행을 테이블에 추가
+                    bookList.appendChild(row);
+                });
+            };
+            
+            /**
+             * 통계 업데이트 함수
+             */
+            const updateStatistics = () => {
+                // 총 도서 수
+                totalBooksSpan.textContent = cartBooks.length;
+                
+                // 선택된 도서 수
+                const selectedBooks = cartBooks.filter(book => book.selected && !book.isDuplicate);
+                selectedBooksSpan.textContent = selectedBooks.length;
+                
+                // 총 금액
+                const totalPrice = selectedBooks.reduce((sum, book) => sum + (book.price || 0), 0);
+                totalPriceSpan.textContent = Utils.formatPrice(totalPrice);
+                
+                // 선택된 도서가 없으면 신청 버튼 비활성화
+                submitBooksBtn.disabled = selectedBooks.length === 0;
+                submitBooksBtn.className = selectedBooks.length === 0 
+                    ? 'bg-gray-400 text-white px-6 py-2 rounded cursor-not-allowed'
+                    : 'bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition';
+            };
+            
+            /**
+             * 희망 도서 신청 함수
+             */
+            const submitBooks = async () => {
+                try {
+                    // 로딩 표시
+                    Utils.toggleLoading(true);
+                    
+                    // 선택된 도서만 필터링
+                    const selectedBooks = cartBooks.filter(book => book.selected && !book.isDuplicate);
+                    
+                    if (selectedBooks.length === 0) {
+                        Utils.showError('선택된 도서가 없습니다.');
+                        Utils.toggleLoading(false);
+                        return;
+                    }
+                    
+                    // 학급 정보
+                    const grade = gradeInput.value.replace('학년', '').trim();
+                    const classNum = classInput.value.replace('반', '').trim();
+                    const teacher = teacherInput.value.trim();
+                    
+                    // 도서 정보에 교사 정보 추가
+                    const booksWithTeacher = selectedBooks.map(book => ({
+                        ...book,
+                        teacher
+                    }));
+                    
+                    // 도서 저장
+                    const gradeClass = Utils.formatGradeClass(grade, classNum);
+                    await DataManager.saveRequestedBooks(booksWithTeacher, gradeClass);
+                    
+                    // 로딩 해제
+                    Utils.toggleLoading(false);
+                    
+                    // 성공 메시지 및 홈으로 이동
+                    alert('희망 도서 신청이 완료되었습니다.');
+                    window.location.href = '../index.html';
+                    
+                } catch (error) {
+                    console.error('도서 신청 오류:', error);
+                    Utils.showError('도서 신청 중 오류가 발생했습니다.');
+                    Utils.toggleLoading(false);
+                }
+            };
+            
+            // 페이지 초기화 실행
+            initPage();
+        });
+    </script>
+</body>
+</html>

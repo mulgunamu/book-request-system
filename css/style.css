@@ -1,0 +1,267 @@
+/* 커스텀 스타일 */
+
+/* 도서 카드 스타일 */
+.book-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.book-cover {
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.book-card:hover .book-cover {
+    transform: scale(1.05);
+}
+
+/* 카테고리 버튼 활성 상태 */
+.category-btn.active {
+    background-color: #3B82F6;
+    color: white;
+    border-color: #3B82F6;
+}
+
+.category-btn.active:hover {
+    background-color: #2563EB;
+}
+
+/* 신청 버튼 스타일 */
+.apply-btn {
+    transition: all 0.2s ease;
+}
+
+.apply-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.apply-btn.owned {
+    background-color: #6B7280;
+}
+
+.apply-btn.applied {
+    background-color: #3B82F6;
+}
+
+.apply-btn.budget-exceeded {
+    background-color: #EF4444;
+}
+
+.apply-btn.available {
+    background-color: #10B981;
+}
+
+.apply-btn.available:hover {
+    background-color: #059669;
+}
+
+/* 로딩 애니메이션 */
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* 토스트 애니메이션 */
+.toast-enter {
+    animation: slideInRight 0.3s ease-out;
+}
+
+.toast-exit {
+    animation: slideOutRight 0.3s ease-in;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* 모달 애니메이션 */
+.modal-enter {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-exit {
+    animation: fadeOut 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .book-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .sidebar {
+        display: none;
+    }
+    
+    .mobile-filter-toggle {
+        display: block;
+    }
+}
+
+@media (max-width: 480px) {
+    .book-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+    
+    .class-info-grid {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* 포커스 스타일 개선 */
+.focus-ring:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: #3B82F6;
+    ring-offset: 2px;
+}
+
+/* 예산 바 애니메이션 */
+.budget-bar {
+    transition: width 0.5s ease-in-out;
+}
+
+/* 도서 카드 상태별 오버레이 */
+.book-card .status-overlay {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+}
+
+.status-overlay.owned {
+    background-color: #6B7280;
+}
+
+.status-overlay.applied {
+    background-color: #3B82F6;
+}
+
+/* 검색 입력 필드 스타일 */
+.search-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 가격 표시 스타일 */
+.price-text {
+    font-weight: 600;
+    color: #1F2937;
+}
+
+.price-discount {
+    color: #EF4444;
+    text-decoration: line-through;
+    font-size: 0.875rem;
+}
+
+/* 도서 정보 텍스트 스타일 */
+.book-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+    height: 2.8em;
+}
+
+.book-author {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: #6B7280;
+    font-size: 0.875rem;
+}
+
+/* 빈 상태 스타일 */
+.empty-state {
+    color: #9CA3AF;
+}
+
+/* 성공/에러 상태 색상 */
+.text-success {
+    color: #10B981;
+}
+
+.text-error {
+    color: #EF4444;
+}
+
+.text-warning {
+    color: #F59E0B;
+}
+
+.bg-success {
+    background-color: #10B981;
+}
+
+.bg-error {
+    background-color: #EF4444;
+}
+
+.bg-warning {
+    background-color: #F59E0B;
+} 
