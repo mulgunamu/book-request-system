@@ -1,0 +1,23 @@
+# 시스템 파일
+.bash_history
+.DS_Store
+
+# PM2 관련
+.pm2/
+*.pid
+
+# 로그 파일
+*.log
+
+# 로컬 설정
+.local/
+
+# 백업 파일
+backend/data/backups/
+backend/data/*.backup.json
+*.old
+
+# 런타임 데이터
+backend/data/admin.json
+backend/data/books.json
+backend/data/budgets.json
