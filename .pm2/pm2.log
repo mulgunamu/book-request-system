@@ -35059,3 +35059,127 @@
 2025-06-07T13:54:06: PM2 log: App [book-system:0] exited with code [0] via signal [SIGTERM]
 2025-06-07T13:54:06: PM2 log: App [book-system:0] starting in -fork mode-
 2025-06-07T13:54:06: PM2 log: App [book-system:0] online
+2025-06-07T15:57:55: PM2 log: Stopping app:book-system id:0
+2025-06-07T15:57:55: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-07T15:57:55: PM2 log: pid=524567 msg=process killed
+2025-06-07T15:57:55: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-07T15:57:55: PM2 log: App [book-system:0] online
+2025-06-08T01:16:10: PM2 log: App [book-server:1] starting in -fork mode-
+2025-06-08T01:16:10: PM2 log: App [book-server:1] online
+2025-06-08T01:18:52: PM2 log: Stopping app:book-server id:1
+2025-06-08T01:18:52: PM2 log: App [book-server:1] exited with code [0] via signal [SIGINT]
+2025-06-08T01:18:52: PM2 log: pid=536229 msg=process killed
+2025-06-08T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-08T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-08T11:45:21: PM2 log: Stopping app:book-system id:0
+2025-06-08T11:45:21: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-08T11:45:21: PM2 log: pid=532737 msg=process killed
+2025-06-08T11:45:21: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-08T11:45:21: PM2 log: App [book-system:0] online
+2025-06-08T11:58:20: PM2 log: Stopping app:book-system id:0
+2025-06-08T11:58:20: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-08T11:58:20: PM2 log: pid=541070 msg=process killed
+2025-06-08T11:58:20: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-08T11:58:20: PM2 log: App [book-system:0] online
+2025-06-08T12:02:04: PM2 log: Stopping app:book-system id:0
+2025-06-08T12:02:04: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-08T12:02:04: PM2 log: pid=541180 msg=process killed
+2025-06-08T12:02:04: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-08T12:02:04: PM2 log: App [book-system:0] online
+2025-06-08T12:04:20: PM2 log: Stopping app:book-system id:0
+2025-06-08T12:04:20: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-08T12:04:20: PM2 log: pid=541230 msg=process killed
+2025-06-08T12:04:20: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-08T12:04:20: PM2 log: App [book-system:0] online
+2025-06-08T12:05:36: PM2 log: Stopping app:book-system id:0
+2025-06-08T12:05:36: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-08T12:05:36: PM2 log: pid=541269 msg=process killed
+2025-06-08T12:05:36: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-08T12:05:36: PM2 log: App [book-system:0] online
+2025-06-08T12:20:37: PM2 log: Stopping app:book-system id:0
+2025-06-08T12:20:37: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-08T12:20:37: PM2 log: pid=541296 msg=process killed
+2025-06-08T12:20:37: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-08T12:20:37: PM2 log: App [book-system:0] online
+2025-06-08T12:30:00: PM2 log: Stopping app:book-system id:0
+2025-06-08T12:30:00: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-08T12:30:00: PM2 log: pid=541504 msg=process killed
+2025-06-08T12:30:00: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-08T12:30:00: PM2 log: App [book-system:0] online
+2025-06-09T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-09T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-10T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-10T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-11T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-11T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-12T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-12T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-12T08:24:26: PM2 log: Stopping app:book-system id:0
+2025-06-12T08:24:26: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-12T08:24:26: PM2 log: pid=541549 msg=process killed
+2025-06-12T08:24:26: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-12T08:24:26: PM2 log: App [book-system:0] online
+2025-06-12T08:44:09: PM2 log: Stopping app:book-system id:0
+2025-06-12T08:44:09: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-12T08:44:10: PM2 log: pid=584192 msg=process killed
+2025-06-12T08:44:10: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-12T08:44:10: PM2 log: App [book-system:0] online
+2025-06-12T10:14:45: PM2 log: Stopping app:book-system id:0
+2025-06-12T10:14:45: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-12T10:14:45: PM2 log: pid=584292 msg=process killed
+2025-06-12T10:14:45: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-12T10:14:45: PM2 log: App [book-system:0] online
+2025-06-13T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-13T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-14T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-14T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-14T04:23:41: PM2 log: Stopping app:book-system id:0
+2025-06-14T04:23:41: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-14T04:23:41: PM2 log: pid=584985 msg=process killed
+2025-06-14T04:23:41: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-14T04:23:41: PM2 log: App [book-system:0] online
+2025-06-14T16:29:12: PM2 log: Stopping app:book-system id:0
+2025-06-14T16:29:12: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-14T16:29:12: PM2 log: pid=604648 msg=process killed
+2025-06-14T16:29:12: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-14T16:29:12: PM2 log: App [book-system:0] online
+2025-06-14T16:30:13: PM2 log: Stopping app:book-system id:0
+2025-06-14T16:30:14: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-14T16:30:14: PM2 log: pid=609918 msg=process killed
+2025-06-14T16:30:14: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-14T16:30:14: PM2 log: App [book-system:0] online
+2025-06-14T16:32:37: PM2 log: Stopping app:book-system id:0
+2025-06-14T16:32:37: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-14T16:32:37: PM2 log: pid=609943 msg=process killed
+2025-06-14T16:32:37: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-14T16:32:37: PM2 log: App [book-system:0] online
+2025-06-15T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-15T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-16T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-16T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-17T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-17T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-17T10:10:20: PM2 log: Stopping app:book-system id:0
+2025-06-17T10:10:20: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-17T10:10:20: PM2 log: pid=609962 msg=process killed
+2025-06-17T10:10:20: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-17T10:10:20: PM2 log: App [book-system:0] online
+2025-06-17T10:13:06: PM2 log: Stopping app:book-system id:0
+2025-06-17T10:13:06: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-17T10:13:06: PM2 log: pid=638519 msg=process killed
+2025-06-17T10:13:06: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-17T10:13:06: PM2 log: App [book-system:0] online
+2025-06-17T10:27:17: PM2 log: Stopping app:book-system id:0
+2025-06-17T10:27:17: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-17T10:27:17: PM2 log: pid=638559 msg=process killed
+2025-06-17T10:27:17: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-17T10:27:17: PM2 log: App [book-system:0] online
+2025-06-18T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-18T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-19T01:51:01: PM2 log: [PM2] This PM2 is not UP TO DATE
+2025-06-19T01:51:01: PM2 log: [PM2] Upgrade to version 6.0.8
+2025-06-19T09:32:34: PM2 log: Stopping app:book-system id:0
+2025-06-19T09:32:34: PM2 log: App [book-system:0] exited with code [0] via signal [SIGINT]
+2025-06-19T09:32:34: PM2 log: pid=638657 msg=process killed
+2025-06-19T09:32:34: PM2 log: App [book-system:0] starting in -fork mode-
+2025-06-19T09:32:34: PM2 log: App [book-system:0] online
