@@ -18,14 +18,6 @@ class BookRequestApp {
         this.isSearchMode = false;
         this.currentSearchQuery = '';
         
-        // 금지도서 목록 (학교 정책에 따라 조정)
-        this.bannedKeywords = [
-	      '성인', '야설', '에로', '19금', '섹스',
-    	      '폭력', '살인', '공포', '호러', '잔혹', '고어',
-              '자살', '마약', '담배', '음주',
-              '극우', '극좌'
-        ];
-        
         this.init();
     }
 
@@ -133,7 +125,6 @@ class BookRequestApp {
             const books = await this.fetchBooksFromAPI(categoryId, 1);
             
             if (books && books.length > 0) {
-                const filteredBooks = this.filterBannedBooks(books);
                 this.renderBooks(filteredBooks);
                 this.totalBooksLoaded = filteredBooks.length;
                 this.updateLoadMoreButton();
@@ -177,7 +168,6 @@ class BookRequestApp {
             }
 
             if (books && books.length > 0) {
-                const filteredBooks = this.filterBannedBooks(books);
                 
                 // 기존 도서에 추가
                 this.renderBooks(filteredBooks, true); // append = true
@@ -266,37 +256,6 @@ class BookRequestApp {
             console.error('❌ 검색 API 실패:', error);
             throw new Error(`검색 결과를 불러올 수 없습니다: ${error.message}`);
         }
-    }
-
-    /**
-     * 금지도서 필터링
-     */
-    filterBannedBooks(books) {
-        return books.filter(book => {
-            const title = (book.title || '').toLowerCase();
-            const author = (book.author || '').toLowerCase();
-            const description = (book.description || '').toLowerCase();
-            
-            // 금지 키워드 검사
-            const hasBannedKeyword = this.bannedKeywords.some(keyword => 
-                title.includes(keyword) || 
-                author.includes(keyword) || 
-                description.includes(keyword)
-            );
-            
-            if (hasBannedKeyword) {
-                console.log(`🚫 금지도서 필터링: "${book.title}"`);
-                return false;
-            }
-            
-            // 연령등급 확인 (있다면)
-            if (book.ageLimit && parseInt(book.ageLimit) > 15) {
-                console.log(`🚫 연령제한 필터링: "${book.title}" (${book.ageLimit}세 이상)`);
-                return false;
-            }
-            
-            return true;
-        });
     }
 
     /**
@@ -438,7 +397,6 @@ class BookRequestApp {
             const books = await this.fetchSearchResults(query, 1);
             
             if (books && books.length > 0) {
-                const filteredBooks = this.filterBannedBooks(books);
                 this.renderBooks(filteredBooks);
                 this.totalBooksLoaded = filteredBooks.length;
                 this.updateLoadMoreButton();
