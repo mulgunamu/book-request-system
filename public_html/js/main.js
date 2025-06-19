@@ -189,7 +189,7 @@ class BookRequestApp {
                 console.log(`✅ 페이지 ${this.currentPage} 로드 완료: +${filteredBooks.length}권 (총 ${this.totalBooksLoaded}권)`);
                 
                 // API 제한 확인
-                if (this.totalBooksLoaded >= this.maxBooksPerCategory || filteredBooks.length < this.booksPerPage) {
+                if (this.totalBooksLoaded >= this.maxBooksPerCategory || books.length < this.booksPerPage) {
                     this.hasMoreBooks = false;
                     console.log(`📚 더 이상 불러올 도서가 없습니다. (총 ${this.totalBooksLoaded}권)`);
                 }
