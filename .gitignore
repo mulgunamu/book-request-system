@@ -27,3 +27,7 @@ backend/data/budgets.json
 *.log
 .DS_Store
 *.backup
+.pm2/
+*.log
+.pm2/
+*.log
