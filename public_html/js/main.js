@@ -46,6 +46,7 @@ class BookRequestApp {
             booksGrid: document.getElementById('booksGrid'),
             loadMoreBtn: document.getElementById('loadMoreBtn'),
             categoryButtons: document.querySelectorAll('.category-btn'),
+            categoryList: document.getElementById('categoryList'),
             searchInput: document.getElementById('searchInput'),
             searchBtn: document.getElementById('searchBtn'),
             loading: document.getElementById('loading'),
@@ -58,22 +59,34 @@ class BookRequestApp {
      * 이벤트 리스너 설정
      */
     setupEventListeners() {
-        // 카테고리 버튼 클릭
-        this.elements.categoryButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        // 카테고리 리스트 전체에 이벤트 위임
+        if (this.elements.categoryList) {
+            this.elements.categoryList.addEventListener('click', (e) => {
                 e.preventDefault();
-                const categoryId = btn.dataset.category;
-                this.loadCategoryBooks(categoryId);
+                
+                // 상위 카테고리 버튼 클릭 (토글)
+                if (e.target.closest('.category-parent-btn')) {
+                    const parentBtn = e.target.closest('.category-parent-btn');
+                    handleCategoryToggle(parentBtn);
+                    return;
+                }
+                
+                // 일반 카테고리 버튼 클릭 (도서 로드)
+                if (e.target.closest('.category-btn')) {
+                    const btn = e.target.closest('.category-btn');
+                    const categoryId = btn.dataset.category;
+                    handleCategoryClick(btn, categoryId);
+                }
             });
-        });
-
+        }
+    
         // 더보기 버튼 클릭
         if (this.elements.loadMoreBtn) {
             this.elements.loadMoreBtn.addEventListener('click', () => {
                 this.handleLoadMore();
             });
         }
-
+    
         // 검색 이벤트
         if (this.elements.searchInput) {
             this.elements.searchInput.addEventListener('keyup', (e) => {
@@ -82,13 +95,15 @@ class BookRequestApp {
                 }
             });
         }
-
+    
         if (this.elements.searchBtn) {
             this.elements.searchBtn.addEventListener('click', () => {
                 this.handleSearch();
             });
         }
     }
+    
+
 
     /**
      * 초기 도서 로드
@@ -518,3 +533,50 @@ document.addEventListener('DOMContentLoaded', () => {
     window.bookApp = bookApp;
     console.log('📚 도서 신청 시스템이 초기화되었습니다.');
 });
+
+// 카테고리 클릭 처리
+function handleCategoryClick(btn, categoryId) {
+    // 모든 버튼에서 active 제거
+    document.querySelectorAll('.category-btn, .category-parent-btn').forEach(b => {
+        b.classList.remove('active', 'bg-blue-600', 'text-white');
+        b.classList.add('bg-gray-200', 'text-gray-700');
+    });
+    
+    // 클릭된 버튼 활성화
+    btn.classList.add('active', 'bg-blue-600', 'text-white');
+    btn.classList.remove('bg-gray-200', 'text-gray-700');
+    
+    // 카테고리 로드
+    window.bookApp.loadCategoryBooks(categoryId);
+}
+
+// 상위 카테고리 토글 처리  
+function handleCategoryToggle(button) {
+    const categoryGroup = button.closest('.category-group');
+    const subcategoryList = categoryGroup.querySelector('.subcategory-list');
+    const chevron = button.querySelector('.fa-chevron-down');
+    
+    if (!subcategoryList) {
+        // 하위 메뉴 없으면 직접 로드
+        const categoryId = button.getAttribute('data-category');
+        handleCategoryClick(button, categoryId);
+        return;
+    }
+    
+    // 현재 상태 토글
+    const isExpanded = button.classList.contains('expanded');
+    
+    if (isExpanded) {
+        // 접기
+        button.classList.remove('expanded');
+        subcategoryList.classList.remove('show');
+        subcategoryList.classList.add('hidden');
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+    } else {
+        // 펼치기  
+        button.classList.add('expanded');
+        subcategoryList.classList.remove('hidden');
+        subcategoryList.classList.add('show');
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+    }
+}

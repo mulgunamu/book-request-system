@@ -21,3 +21,9 @@ backend/data/*.backup.json
 backend/data/admin.json
 backend/data/books.json
 backend/data/budgets.json
+.bash_history
+.pm2/
+*.pid
+*.log
+.DS_Store
+*.backup

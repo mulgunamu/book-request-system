@@ -1373,6 +1373,15 @@ router.get('/aladin-proxy', async (req, res) => {
             ...otherParams
         });
         
+        if (params.has('start')) {
+            const originalStart = parseInt(params.get('start'));
+            if (originalStart > 50) {
+                const correctPage = Math.ceil(originalStart / 50);
+                params.set('start', correctPage.toString());
+                console.log(`start 파라미터 수정: ${originalStart} → ${correctPage}`);
+            }
+        }
+        
         // 엔드포인트별 기본값 설정
         if (targetEndpoint === 'ItemSearch.aspx') {
             if (!params.has('Query')) params.set('Query', 'test');

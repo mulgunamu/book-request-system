@@ -56,9 +56,6 @@ class AladinAPI {
             SearchTarget: 'Book',
             output: this.output,
             Version: this.version,
-            Year: currentYear,
-            Month: currentMonth,
-            Week: currentWeek
         };
         
         console.log(`📊 현재 주간 베스트셀러 API 요청: start=${start}, maxResults=${maxResults}, Year=${currentYear}, Month=${currentMonth}, Week=${currentWeek}`);
@@ -66,7 +63,7 @@ class AladinAPI {
         const currentResult = await this.makeRequest('ItemList.aspx', currentParams);
         
         // 현재 주간 데이터가 100권 미만이면 이전 주간 데이터도 조회
-        if (currentResult.meta.totalCount < 100 && start > 100) {
+        if (currentResult.meta.totalCount < 100 && start > 999) {
             console.log(`📊 이전 주간 베스트셀러 조회: Year=${prevYear}, Month=${prevMonth}, Week=${prevWeek}`);
             
             const prevParams = {
