@@ -254,14 +254,14 @@
                 this.filteredApplications = [];
                 this.deleteTargetId = null;
                 this.isAuthenticated = false;
-                
                 this.elements = {};
             }
 
             async init() {
+                console.log('🚀 Applications 페이지 초기화 시작');
                 this.bindElements();
                 this.bindEvents();
-                // 세션스토리지 기반 인증 유지
+                // ✅ 수정: 페이지 로드 시 즉시 세션 인증 확인
                 await this.checkSessionAuth();
             }
 
@@ -300,8 +300,12 @@
             }
 
             bindEvents() {
-                // 인증 관련 이벤트
-                this.elements.grade.addEventListener('change', () => this.loadClassList());
+                // ✅ 수정: 학년 선택 이벤트 리스너 강화
+                this.elements.grade.addEventListener('change', () => {
+                    console.log('📚 학년 선택됨:', this.elements.grade.value);
+                    this.loadClassList();
+                });
+                
                 this.elements.authenticateBtn.addEventListener('click', () => this.authenticateClass());
                 this.elements.password.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
@@ -332,65 +336,11 @@
                 });
             }
 
-            // 세션스토리지 기반 인증 확인
-            async checkSessionAuth() {
-                // URL에서 force=true 파라미터 확인
-                const urlParams = new URLSearchParams(window.location.search);
-                const forceAuth = urlParams.get('force') === 'true';
-                
-                if (forceAuth) {
-                    // force=true인 경우 URL의 학년/반 정보 사용
-                    const grade = urlParams.get('grade');
-                    const classNum = urlParams.get('class');
-                    if (grade && classNum) {
-                        const classId = `${grade}-${classNum}`;
-                        // 서버에서 학급 정보 조회
-                        const response = await fetch('/api/classes/settings');
-                        if (response.ok) {
-                            const classSettings = await response.json();
-                            const classData = classSettings.find(cls => cls.classId === classId);
-                            if (classData) {
-                                // force=true일 때는 세션스토리지의 인증 정보를 무시하고 URL의 학급 정보 사용
-                                this.currentClass = classData;
-                                this.isAuthenticated = true;
-                                this.showMainContent();
-                                this.loadClassInfo();
-                                await this.loadApplications();
-                                return;
-                            }
-                        }
-                    }
-                    // force=true인데 URL 정보가 유효하지 않으면 인증 섹션 표시
-                    this.showAuthSection();
-                    return;
-                }
-
-                // force=true가 아닌 경우에만 세션스토리지 기반 인증 확인
-                const authInfo = JSON.parse(sessionStorage.getItem('classAuth') || 'null');
-                if (authInfo && authInfo.classId && authInfo.expiry > Date.now()) {
-                    // 서버에서 학급 정보 조회
-                    const response = await fetch('/api/classes/settings');
-                    if (response.ok) {
-                        const classSettings = await response.json();
-                        const classData = classSettings.find(cls => cls.classId === authInfo.classId);
-                        if (classData) {
-                            this.currentClass = classData;
-                            this.isAuthenticated = true;
-                            this.showMainContent();
-                            this.loadClassInfo();
-                            await this.loadApplications();
-                            return;
-                        }
-                    }
-                }
-                // 인증 정보가 없거나 만료됨
-                sessionStorage.removeItem('classAuth');
-                this.showAuthSection();
-            }
-
-            // 학급 목록 로드
+            // ✅ 수정: 학급 목록 로드 타입 비교 문제 해결
             async loadClassList() {
                 const grade = this.elements.grade.value;
+                console.log('📡 loadClassList 호출됨. 선택된 학년:', grade);
+                
                 if (!grade) {
                     this.elements.class.innerHTML = '<option value="">반 선택</option>';
                     return;
@@ -401,60 +351,105 @@
                     if (!response.ok) throw new Error('학급 목록을 불러올 수 없습니다.');
                     
                     const classes = await response.json();
-                    const gradeClasses = classes.filter(cls => cls.grade == grade);
+                    console.log('📊 전체 학급 데이터:', classes);
                     
+                    // ✅ 수정: 타입 안전한 비교 (string으로 통일)
+                    const gradeClasses = classes.filter(cls => String(cls.grade) === String(grade));
+                    console.log(`${grade}학년 반 목록:`, gradeClasses);
+                    
+                    // ✅ 수정: option value를 classId 형태로 통일
                     this.elements.class.innerHTML = '<option value="">반 선택</option>' +
                         gradeClasses.map(cls => 
-                            `<option value="${cls.grade}-${cls.class}">${cls.class}반</option>`
+                            `<option value="${cls.classId}">${cls.class}반</option>`
                         ).join('');
                         
+                    console.log(`✅ ${grade}학년 ${gradeClasses.length}개 반 추가됨`);
+                        
                 } catch (error) {
-                    console.error('학급 목록 로드 오류:', error);
+                    console.error('❌ 학급 목록 로드 오류:', error);
                     Toast.show('오류', '학급 목록을 불러올 수 없습니다.', 'error');
                 }
             }
 
-            // 학급 인증
-            async authenticateClass() {
-                let classId = getClassIdFromQuery();
-                if (!classId) {
-                    const grade = this.elements.grade.value;
-                    const classNum = this.elements.class.value;
-                    if (!grade || !classNum) {
-                        Toast.show('입력 오류', '학년, 반을 모두 선택해주세요.', 'warning');
-                        return;
-                    }
-                    // classNum이 이미 '1-1' 형태라면 그대로 사용, 아니면 조합
-                    if (/^\d-\d$/.test(classNum)) {
-                        classId = classNum;
-                    } else {
-                        classId = `${grade}-${classNum}`;
-                    }
-                }
-                // 이미 인증된 학급이면 인증 모달 없이 바로 인증 처리
-                const authInfo = JSON.parse(sessionStorage.getItem('classAuth') || 'null');
-                if (authInfo && authInfo.classId === classId && authInfo.expiry > Date.now()) {
-                    // 서버에서 학급 정보 fetch 후 UI 갱신
-                    const response = await fetch('/api/classes/settings');
-                    if (response.ok) {
-                        const classSettings = await response.json();
-                        const classData = classSettings.find(cls => cls.classId === classId);
-                        if (classData) {
-                            this.currentClass = classData;
-                            this.isAuthenticated = true;
-                            this.showMainContent();
-                            this.loadClassInfo();
-                            await this.loadApplications();
-                            return;
-                        }
-                    }
-                }
-                // 인증이 안 된 학급이거나 만료된 경우에만 인증 모달/로직 진행
-                const password = this.elements.password.value;
-                if (!password) {
-                    Toast.show('입력 오류', '비밀번호를 입력해주세요.', 'warning');
+            // ✅ 수정: 세션 인증 확인 로직 강화
+            async checkSessionAuth() {
+                console.log('🔍 세션 인증 확인 시작...');
+                
+                // URL에서 force=true 파라미터 확인
+                const urlParams = new URLSearchParams(window.location.search);
+                const forceAuth = urlParams.get('force') === 'true';
+                
+                if (forceAuth) {
+                    console.log('⚠️ force=true 파라미터로 인해 세션 무시');
+                    this.showAuthSection();
                     return;
                 }
+
+                // 세션스토리지에서 인증 정보 확인
+                const authInfo = JSON.parse(sessionStorage.getItem('classAuth') || 'null');
+                console.log('💾 저장된 인증 정보:', authInfo);
+                
+                if (authInfo && authInfo.classId && authInfo.expiry > Date.now()) {
+                    console.log('✅ 유효한 세션 인증 정보 발견');
+                    
+                    try {
+                        // 서버에서 학급 정보 조회
+                        const response = await fetch('/api/classes/settings');
+                        if (response.ok) {
+                            const classSettings = await response.json();
+                            const classData = classSettings.find(cls => cls.classId === authInfo.classId);
+                            
+                            if (classData) {
+                                console.log('🎯 학급 데이터 매칭 성공:', classData);
+                                this.currentClass = classData;
+                                this.isAuthenticated = true;
+                                this.showMainContent();
+                                this.loadClassInfo();
+                                await this.loadApplications();
+                                return;
+                            } else {
+                                console.log('❌ 서버에서 해당 학급 정보를 찾을 수 없음');
+                            }
+                        } else {
+                            console.log('❌ 서버 응답 실패:', response.status);
+                        }
+                    } catch (error) {
+                        console.error('❌ 서버 통신 오류:', error);
+                    }
+                } else {
+                    if (authInfo) {
+                        console.log('⏰ 세션 만료됨. 만료 시간:', new Date(authInfo.expiry));
+                    } else {
+                        console.log('📝 저장된 인증 정보 없음');
+                    }
+                }
+                
+                // 인증 정보가 없거나 만료됨
+                sessionStorage.removeItem('classAuth');
+                console.log('🔓 인증 섹션 표시');
+                this.showAuthSection();
+            }
+
+            // ✅ 수정: 학급 인증 로직 개선
+            async authenticateClass() {
+                const grade = this.elements.grade.value;
+                const classValue = this.elements.class.value;
+                const password = this.elements.password.value;
+                
+                console.log('🔐 인증 시도:', { grade, classValue, password: '***' });
+                
+                if (!grade || !classValue || !password) {
+                    Toast.show('입력 오류', '학년, 반, 비밀번호를 모두 입력해주세요.', 'warning');
+                    return;
+                }
+                
+                // classValue가 이미 classId 형태인지 확인
+                let classId = classValue;
+                if (!classValue.includes('-')) {
+                    classId = `${grade}-${classValue}`;
+                }
+                
+                console.log('🎯 최종 classId:', classId);
                 
                 try {
                     const response = await fetch('/api/classes/authenticate', {
@@ -469,35 +464,44 @@
                     });
                     
                     const result = await response.json();
+                    console.log('📡 서버 응답:', result);
                     
                     if (response.ok && result.success) {
                         // 인증 성공
                         this.currentClass = result.classInfo;
                         this.isAuthenticated = true;
+                        
                         // 세션스토리지에 인증 정보 저장 (2시간 유지)
-                        sessionStorage.setItem('classAuth', JSON.stringify({
+                        const authData = {
                             classId: classId,
                             expiry: Date.now() + (2 * 60 * 60 * 1000)
-                        }));
+                        };
+                        sessionStorage.setItem('classAuth', JSON.stringify(authData));
+                        
+                        console.log('💾 세션 정보 저장:', authData);
                         Toast.show('인증 성공', `${classId} 학급으로 인증되었습니다.`, 'success');
-                        location.reload(); // 인증 성공 후 새로고침
-                        return;
+                        
+                        // ✅ 수정: UI 즉시 업데이트 (새로고침 대신)
+                        this.showMainContent();
+                        this.loadClassInfo();
+                        await this.loadApplications();
+                        
                     } else {
+                        console.log('❌ 인증 실패:', result.error);
                         Toast.show('인증 실패', result.error || '인증에 실패했습니다.', 'error');
                     }
                 } catch (error) {
-                    console.error('인증 오류:', error);
+                    console.error('❌ 인증 오류:', error);
                     Toast.show('오류', '인증 중 오류가 발생했습니다.', 'error');
                 }
             }
 
-            // 인증 섹션 표시
+            // UI 표시 메서드들
             showAuthSection() {
                 this.elements.authSection.classList.remove('hidden');
                 this.elements.mainContent.classList.add('hidden');
             }
 
-            // 메인 콘텐츠 표시
             showMainContent() {
                 this.elements.authSection.classList.add('hidden');
                 this.elements.mainContent.classList.remove('hidden');
@@ -781,10 +785,11 @@
             }
         }
 
-        // 애플리케이션 시작
-        const applicationsApp = new ApplicationsApp();
+        // ✅ 수정: DOMContentLoaded에서 바로 초기화
         document.addEventListener('DOMContentLoaded', () => {
-            applicationsApp.init();
+            console.log('🚀 Applications 페이지 초기화 시작');
+            window.applicationsApp = new ApplicationsApp();
+            window.applicationsApp.init();
         });
 
         function getClassIdFromQuery() {
@@ -798,4 +803,4 @@
         }
     </script>
 </body>
-</html> 
+</html>

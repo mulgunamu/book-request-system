@@ -31,3 +31,9 @@ backend/data/budgets.json
 *.log
 .pm2/
 *.log
+*.bak
+*.backup
+public_html/js/main.js.????????
+*.bak
+*.backup
+public_html/js/main.js.????????

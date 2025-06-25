@@ -510,30 +510,6 @@ router.delete('/backups/:backupName', async (req, res) => {
     }
 });
 
-// 금지 도서 필터 상태 조회
-router.get('/ban-filter', async (req, res) => {
-    try {
-        const config = await global.readData('systemConfig');
-        res.json({
-            success: true,
-            banFilterEnabled: config.banFilterEnabled !== false // 기본값 true
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, error: '금지 도서 필터 상태 조회 실패' });
-    }
-});
 
-// 금지 도서 필터 상태 저장
-router.post('/ban-filter', async (req, res) => {
-    try {
-        const { enabled } = req.body;
-        const config = await global.readData('systemConfig');
-        config.banFilterEnabled = !!enabled;
-        await global.writeData('systemConfig', config);
-        res.json({ success: true, banFilterEnabled: config.banFilterEnabled });
-    } catch (error) {
-        res.status(500).json({ success: false, error: '금지 도서 필터 상태 저장 실패' });
-    }
-});
 
 module.exports = router; 

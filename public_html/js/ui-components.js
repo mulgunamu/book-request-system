@@ -446,7 +446,7 @@ const UIComponents = (() => {
          * @param {object} meta - 페이지 메타 정보
          * @param {function} onPageChange - 페이지 변경 콜백
          */
-        renderPagination: (meta, onPageChange) => {
+       /* renderPagination: (meta, onPageChange) => {
             const loadMoreBtn = document.getElementById('load-more-btn');
             if (!loadMoreBtn) return;
 
@@ -456,7 +456,7 @@ const UIComponents = (() => {
                 loadMoreBtn.classList.remove('hidden');
                 loadMoreBtn.onclick = () => onPageChange(meta.currentPage + 1);
             }
-        },
+        },*/
 
         // ===== 유틸리티 =====
         

@@ -309,6 +309,7 @@
     transform: rotate(180deg);
 }
 
+/* 🔧 핵심 수정 부분: Tailwind hidden 클래스 우선순위 무시 */
 .subcategory-list {
     max-height: 0;
     overflow: hidden;
@@ -317,10 +318,17 @@
 }
 
 .subcategory-list.show {
-    max-height: 500px;
-    opacity: 1;
+    max-height: 500px !important;
+    opacity: 1 !important;
+    display: block !important;
 }
 
+/* hidden 클래스를 무시하도록 강제 */
+.subcategory-list.hidden {
+    display: none !important;
+}
+
+/* 서브카테고리 버튼 스타일 */
 .subcategory-list .category-btn {
     background-color: #f8fafc;
     border-color: #e2e8f0;
