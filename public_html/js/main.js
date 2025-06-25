@@ -1020,20 +1020,53 @@ async handleLoadMore() {
      * 예산 정보 로드
      */
     async loadBudgetInfo(classId) {
-        // 예산 정보를 로드하고 표시하는 로직
-        const defaultBudget = 500000; // 기본 예산 50만원
-        const appliedBooks = JSON.parse(localStorage.getItem(`appliedBooks_${classId}`) || '[]');
-        const usedBudget = appliedBooks.reduce((sum, book) => sum + (book.price || 0), 0);
-        
-        if (this.elements.usedBudget) {
-            this.elements.usedBudget.textContent = usedBudget.toLocaleString();
-        }
-        if (this.elements.totalBudget) {
-            this.elements.totalBudget.textContent = defaultBudget.toLocaleString();
-        }
-        if (this.elements.budgetBar) {
-            const percentage = (usedBudget / defaultBudget) * 100;
-            this.elements.budgetBar.style.width = `${Math.min(percentage, 100)}%`;
+        try {
+            console.log('📊 예산 정보 로드 시작:', classId);
+            
+            // 1. 서버에서 신청 목록 가져오기 (applications.json)
+            const applications = await this.getApplicationsByClass(classId);
+            const usedBudget = applications.reduce((sum, app) => sum + (app.price || 0), 0);
+            
+            // 2. 서버에서 총 예산 가져오기 (classes.json)
+            const totalBudget = await this.getClassBudget(classId);
+            
+            // 3. 예산 계산
+            const remainingBudget = totalBudget - usedBudget;
+            const percentage = totalBudget > 0 ? Math.round((usedBudget / totalBudget) * 100) : 0;
+            
+            // 4. UI 업데이트
+            if (this.elements.usedBudget) {
+                this.elements.usedBudget.textContent = usedBudget.toLocaleString();
+            }
+            
+            if (this.elements.totalBudget) {
+                this.elements.totalBudget.textContent = totalBudget.toLocaleString();
+            }
+            
+            if (this.elements.budgetBar) {
+                this.elements.budgetBar.style.width = `${Math.min(percentage, 100)}%`;
+                
+                // 예산 사용률에 따른 색상 변경
+                if (percentage >= 90) {
+                    this.elements.budgetBar.className = 'bg-red-600 h-2 rounded-full transition-all duration-500';
+                } else if (percentage >= 70) {
+                    this.elements.budgetBar.className = 'bg-yellow-500 h-2 rounded-full transition-all duration-500';
+                } else {
+                    this.elements.budgetBar.className = 'bg-blue-600 h-2 rounded-full transition-all duration-500';
+                }
+            }
+            
+            console.log('✅ 예산 정보 업데이트 완료:', {
+                classId, usedBudget, totalBudget, remainingBudget, percentage: percentage + '%'
+            });
+            
+        } catch (error) {
+            console.error('❌ 예산 정보 로드 오류:', error);
+            
+            // 에러 발생 시 기본값으로 표시
+            if (this.elements.usedBudget) this.elements.usedBudget.textContent = '0';
+            if (this.elements.totalBudget) this.elements.totalBudget.textContent = '250,000';
+            if (this.elements.budgetBar) this.elements.budgetBar.style.width = '0%';
         }
     }
 
@@ -2366,7 +2399,90 @@ displayBooks(books, clearPrevious = true) {
             timeout = setTimeout(later, wait);
         };
     }
+
+ // 👇 마지막 기존 메서드 다음에 하나만 추가
+ async getClassBudget(classId) {
+    try {
+        console.log('💰 학급 예산 정보 조회:', classId);
+        
+        const response = await fetch('/api/classes/settings');
+        if (response.ok) {
+            const classSettings = await response.json();
+            
+            if (Array.isArray(classSettings)) {
+                const classData = classSettings.find(cls => cls.classId === classId);
+                if (classData && typeof classData.budget === 'number') {
+                    console.log('✅ 예산 조회 성공:', classData.budget);
+                    return classData.budget;
+                }
+            }
+        }
+        
+        return 250000;
+    } catch (error) {
+        console.error('❌ 예산 조회 오류:', error);
+        return 250000;
+    }
 }
+
+/**
+     * 학급별 신청 목록 조회 (서버 applications.json)
+     */
+async getApplicationsByClass(classId) {
+    try {
+        console.log('📋 학급별 신청 목록 조회:', classId);
+        
+        const response = await fetch('/api/applications');
+        if (response.ok) {
+            const allApplications = await response.json();
+            // classId로 필터링
+            const classApplications = allApplications.filter(app => app.classId === classId);
+            console.log('✅ 신청 목록 조회 성공:', classApplications.length, '건');
+            return classApplications;
+        } else {
+            console.warn('⚠️ 신청 목록 조회 실패:', response.status);
+            return [];
+        }
+    } catch (error) {
+        console.error('❌ 신청 목록 조회 오류:', error);
+        return [];
+    }
+}
+
+/**
+     * 도서 신청 (서버 applications.json에 추가)
+     */
+async addApplication(applicationData) {
+    try {
+        console.log('📚 도서 신청 API 호출:', applicationData.title);
+        
+        const response = await fetch('/api/applications', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(applicationData)
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            console.log('✅ 도서 신청 성공:', result);
+            return true;
+        } else {
+            const error = await response.json();
+            console.error('❌ 도서 신청 실패:', error);
+            throw new Error(error.message || '도서 신청에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('❌ 도서 신청 오류:', error);
+        throw error;
+    }
+}
+
+ }
+
+
+
 
 // 전역 함수들
 window.closeModal = function() {
