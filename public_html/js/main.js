@@ -43,6 +43,10 @@ class BookRequestSystem {
             console.error('❌ 시스템 초기화 실패:', error);
             this.showErrorMessage('시스템 초기화 중 오류가 발생했습니다.');
         }
+
+        this.setupModalObserver();
+    
+    console.log('✅ 시스템 초기화 완료!');
     }
 
     /**
@@ -322,60 +326,36 @@ handleCategoryParentClick(button) {
      */
     async loadOwnedBooks() {
         try {
-            console.log('📚 보유도서 정보 로드 시작...');
+            console.log('📚 BookStatusManager를 통한 보유도서 로드...');
             
-            // 여러 경로에서 시도
-            const possiblePaths = [
-                './backend/data/owned-books.json',
-                './data/owned-books.json',
-                './owned-books.json',
-                '/backend/data/owned-books.json'
-            ];
-            
-            let ownedBooks = [];
-            let loaded = false;
-            
-            for (const path of possiblePaths) {
-                try {
-                    console.log(`🔍 경로 시도: ${path}`);
-                    const response = await fetch(path);
-                    
-                    if (response.ok) {
-                        ownedBooks = await response.json();
-                        console.log(`✅ 경로 성공: ${path}`);
-                        loaded = true;
-                        break;
-                    }
-                } catch (pathError) {
-                    console.log(`❌ 경로 실패: ${path}`);
-                    continue;
-                }
-            }
-            
-            if (loaded) {
-                // 전역 변수에 저장
-                window.ownedBooks = ownedBooks;
+            // BookStatusManager에 위임
+            if (window.bookStatusManager) {
+                await window.bookStatusManager.loadOwnedBooks();
                 
-                console.log(`✅ 보유도서 ${ownedBooks.length}권 로드 완료`);
+                const stats = window.bookStatusManager.getStats();
+                console.log(`✅ BookStatusManager 로드 완료:`, stats);
                 
-                // 북 상태 매니저에 보유도서 정보 설정
-                if (window.bookStatusManager) {
-                    window.bookStatusManager.setOwnedBooks(ownedBooks);
-                }
+                // 호환성을 위해 전역 변수에도 설정
+                window.ownedBooks = Array.from(window.bookStatusManager.ownedBooksMap.values());
                 
-                // 보유도서 정보를 즉시 표시하도록 설정
                 this.ownedBooksLoaded = true;
+                this.updateCurrentBooksStatus();
+                this.showNotification(`보유도서 ${stats.totalOwnedBooks}권 로드 완료`, 'success');
+                
             } else {
-                console.log('📚 모든 경로에서 owned-books.json 파일을 찾을 수 없음, 빈 배열로 초기화');
-                window.ownedBooks = [];
-                this.ownedBooksLoaded = true;
+                console.error('❌ BookStatusManager를 찾을 수 없습니다.');
+                this.showNotification('보유도서 관리자를 초기화할 수 없습니다.', 'error');
             }
+            
         } catch (error) {
             console.error('❌ 보유도서 로드 오류:', error);
-            window.ownedBooks = [];
+            this.showNotification('보유도서 로드 중 오류가 발생했습니다.', 'error');
             this.ownedBooksLoaded = true;
         }
     }
+
+    
+
 
     /**
      * 카테고리 이벤트 설정
@@ -614,6 +594,8 @@ handleCategoryParentClick(button) {
         }
 
         this.isLoading = true;
+        this.currentQuery = query.trim(); // 현재 검색어 저장
+        this.currentCategory = null; // 카테고리 모드 해제
         this.showLoadingState();
 
         try {
@@ -639,23 +621,32 @@ handleCategoryParentClick(button) {
                 
                 console.log(`🔍 searchManager 검색 결과: ${books.length}권`);
                 
-            } else if (window.aladinAPI && typeof window.aladinAPI.callAPI === 'function') {
-                console.log('📖 aladinAPI.callAPI로 직접 검색 시도...');
+            } else if (window.aladinAPI && typeof window.aladinAPI.searchBooks === 'function') {
+                console.log('📖 aladinAPI.searchBooks로 직접 검색 시도...');
                 
-                // API 직접 호출로 검색
-                const params = {
-                    Query: query.trim(),
-                    QueryType: 'Title',
-                    MaxResults: 50,
-                    start: 1,
-                    SearchTarget: 'Book',
-                    Sort: 'SalesPoint',
-                    Version: '20131101'
-                };
+                console.log('🌐 검색 쿼리:', query.trim());
                 
-                console.log('🌐 검색 API 파라미터:', params);
+                const response = await window.aladinAPI.searchBooks(query.trim());
                 
-                const response = await window.aladinAPI.callAPI('ItemSearch.aspx', params);
+                console.log('📡 검색 API 응답:', response);
+                
+                if (response && response.books && Array.isArray(response.books)) {
+                    books = response.books.map(item => ({
+                        title: item.title || '제목 없음',
+                        author: item.author || item.authors || '저자 미상',
+                        publisher: item.publisher || '출판사 미상',
+                        cover: item.cover || item.thumbnail || '/images/no-image.png',
+                        pubDate: item.pubDate || item.datetime || '0000-00-00',
+                        price: parseInt(item.priceStandard || item.price) || 0,
+                        salePrice: parseInt(item.priceSales || item.sale_price || item.priceStandard || item.price) || 0,
+                        isbn13: item.isbn13 || item.isbn || '',
+                        isbn: item.isbn || item.isbn13 || '',
+                        description: item.description || item.contents || '',
+                        link: item.link || item.url || ''
+                    }));
+                }
+                
+                console.log(`📖 직접 검색 결과: ${books.length}권`);
                 
                 console.log('📡 검색 API 응답:', response);
                 
@@ -824,22 +815,32 @@ handleCategoryParentClick(button) {
  * handleLoadMore 메서드도 함께 수정 (디버깅 강화)
  */
 async handleLoadMore() {
-    if (this.isLoading) {
-        console.log('⏳ 이미 로딩 중...');
-        return;
-    }
-    
     console.log('📖 더보기 로드 시작...');
     console.log('현재 상태:', {
         currentCategory: this.currentCategory,
+        currentQuery: this.currentQuery,
         currentPage: this.currentPage,
         currentBooks: this.currentBooks?.length || 0,
         isLoading: this.isLoading
     });
-    
-    if (!this.currentCategory) {
-        console.warn('⚠️ 현재 카테고리가 설정되지 않음');
-        this.showNotification('카테고리가 설정되지 않았습니다.', 'warning');
+
+    // 🔒 로딩 중이면 차단 (검색/카테고리 상관없이)
+    if (this.isLoading) {
+        console.log('⏳ 이미 로딩 중...');
+        return;
+    }
+
+    // 검색 모드인지 카테고리 모드인지 확인
+    if (!this.currentCategory && !this.currentQuery) {
+        console.log('⚠️ 현재 카테고리나 검색어가 설정되지 않음');
+        this.showNotification('카테고리나 검색어가 설정되지 않았습니다.', 'warning');
+        return;
+    }
+
+    // 🔍 검색 모드일 때
+    if (this.currentQuery && !this.currentCategory) {
+        console.log('🔍 검색 모드에서 더보기 실행:', this.currentQuery);
+        await this.handleSearchLoadMore();
         return;
     }
 
@@ -874,6 +875,86 @@ async handleLoadMore() {
         
         // 페이지 번호 롤백
         //this.currentPage = Math.max(1, this.currentPage - 1);
+    }
+}
+
+/**
+     * 검색 모드에서 더보기 처리
+     */
+async handleSearchLoadMore() {
+    if (this.isLoading) {
+        console.log('⏳ 이미 로딩 중...');
+        return;
+    }
+
+    this.isLoading = true;
+    this.showLoadingState();
+
+    try {
+        const nextPage = this.currentPage + 1;
+        console.log(`🔍 검색 더보기: "${this.currentQuery}" 페이지 ${nextPage}`);
+
+        // 알라딘 API로 다음 페이지 검색
+        const searchParams = {
+            query: this.currentQuery,
+            start: (nextPage - 1) * 50 + 1,
+            maxResults: 50
+        };
+
+        let books = [];
+        if (window.aladinAPI && typeof window.aladinAPI.searchBooks === 'function') {
+            const response = await window.aladinAPI.searchBooks(this.currentQuery, searchParams.start, searchParams.maxResults);
+            
+            if (response && response.books && Array.isArray(response.books)) {
+                books = response.books.map(item => ({
+                    title: item.title || '제목 없음',
+                    author: item.author || item.authors || '저자 미상',
+                    publisher: item.publisher || '출판사 미상',
+                    cover: item.cover || item.thumbnail || '/images/no-image.png',
+                    pubDate: item.pubDate || item.datetime || '0000-00-00',
+                    price: parseInt(item.priceStandard || item.price) || 0,
+                    salePrice: parseInt(item.priceSales || item.sale_price || item.priceStandard || item.price) || 0,
+                    isbn13: item.isbn13 || item.isbn || '',
+                    isbn: item.isbn || item.isbn13 || '',
+                    description: item.description || item.contents || '',
+                    link: item.link || item.url || ''
+                }));
+            }
+        }
+
+        if (books.length > 0) {
+            // 중복 제거
+            const existingIsbns = new Set(this.currentBooks.map(book => book.isbn13 || book.isbn));
+            const newBooks = books.filter(book => {
+                const isbn = book.isbn13 || book.isbn;
+                return !existingIsbns.has(isbn);
+            });
+
+            if (newBooks.length > 0) {
+                this.currentBooks = [...this.currentBooks, ...newBooks];
+                this.currentPage = nextPage;
+                
+                console.log(`✅ 검색 더보기 완료: ${newBooks.length}권 추가 (총 ${this.currentBooks.length}권)`);
+                
+                this.displayBooks(this.currentBooks, false);
+                this.updateCurrentBooksStatus();
+                this.showNotification(`${newBooks.length}권이 더 로드되었습니다.`, 'success');
+            } else {
+                console.log('ℹ️ 새로운 도서가 없습니다.');
+                this.showNotification('더 이상 새로운 도서가 없습니다.', 'info');
+            }
+        } else {
+            console.log('ℹ️ 더 이상 검색 결과가 없습니다.');
+            this.showNotification('더 이상 검색 결과가 없습니다.', 'info');
+        }
+
+    } catch (error) {
+        console.error('❌ 검색 더보기 오류:', error);
+        this.showNotification('더보기 로드 중 오류가 발생했습니다.', 'error');
+    } finally {
+        this.isLoading = false;
+        this.hideLoadingState();
+        this.updateLoadMoreButton();
     }
 }
 
@@ -1281,6 +1362,35 @@ async handleLoadMore() {
      */
     closeModal() {
         if (this.elements.bookModal) {
+            // 🧹 모달 완전 초기화 (버튼 상태 복원)
+        const processedMark = this.elements.bookModal.querySelector('.owned-processed');
+        if (processedMark) {
+            processedMark.remove();
+            console.log('🧹 모달 처리 마킹 정리 완료');
+        }
+        
+        // 🔄 버튼 상태 복원 (원래 "신청하기"로)
+        const buttons = this.elements.bookModal.querySelectorAll('button');
+        buttons.forEach((btn) => {
+            if (btn.textContent.includes('신청불가') || btn.innerHTML.includes('신청불가')) {
+                console.log('🔄 버튼 상태 복원:', btn.textContent.trim());
+                
+                // 버튼 내용 복원
+                btn.innerHTML = '신청하기';
+                btn.disabled = false;
+                btn.style.cssText = ''; // 모든 인라인 스타일 제거
+                btn.onclick = null; // 이벤트 핸들러 제거
+                
+                console.log('✅ 버튼 복원 완료');
+            }
+        });
+        
+        // 🗑️ "보유중" 표시 제거
+        const ownedBadge = this.elements.bookModal.querySelector('.owned-badge');
+        if (ownedBadge) {
+            ownedBadge.remove();
+            console.log('🗑️ 보유중 표시 제거 완료');
+        }        // 모달 숨기기 및 스타일 초기화
             this.elements.bookModal.classList.add('hidden');
             this.elements.bookModal.style.display = 'none';
         }
@@ -1292,29 +1402,23 @@ async handleLoadMore() {
      */
     async checkBookStatus(book) {
         try {
-            // ISBN 정규화
-            const isbn = book.isbn13 || book.isbn || '';
-            const normalizedIsbn = isbn.replace(/[^0-9]/g, '');
-            
-            if (!normalizedIsbn) {
+            if (!book || (!book.isbn13 && !book.isbn)) {
                 return { isOwned: false, isApplied: false };
             }
-            
-            // 1. 보유도서 체크 (인증 없이 항상 표시)
+    
+            // 1. BookStatusManager로 보유도서 체크
             let isOwned = false;
-            if (window.ownedBooks && Array.isArray(window.ownedBooks)) {
-                isOwned = window.ownedBooks.some(ownedBook => {
-                    const ownedIsbn = (ownedBook.isbn || '').replace(/[^0-9]/g, '');
-                    return ownedIsbn === normalizedIsbn;
-                });
+            if (window.bookStatusManager && window.bookStatusManager.isLoaded) {
+                isOwned = window.bookStatusManager.isBookOwned(book);
             }
             
-            // 2. 신청도서 체크 (세션스토리지 기반)
+            // 2. 신청도서 체크 (기존 로직 유지)
             let isApplied = false;
             try {
                 const authInfo = JSON.parse(sessionStorage.getItem('classAuth') || 'null');
                 if (authInfo && authInfo.classId) {
                     const appliedBooks = JSON.parse(localStorage.getItem(`appliedBooks_${authInfo.classId}`) || '[]');
+                    const normalizedIsbn = (book.isbn13 || book.isbn || '').replace(/[^0-9]/g, '');
                     isApplied = appliedBooks.some(appliedBook => {
                         const appliedIsbn = (appliedBook.isbn13 || appliedBook.isbn || '').replace(/[^0-9]/g, '');
                         return appliedIsbn === normalizedIsbn;
@@ -1888,7 +1992,7 @@ updateLoadMoreButton() {
     /**
  * 도서 목록 표시 - 중복 카드 생성 방지 버전
  */
-displayBooks(books, clearPrevious = true) {
+async displayBooks(books, clearPrevious = true) {
     try {
         console.log(`📋 도서 목록 표시: ${books.length}권, 초기화: ${clearPrevious}`);
         
@@ -1964,7 +2068,15 @@ displayBooks(books, clearPrevious = true) {
         console.error('❌ 도서 목록 표시 오류:', error);
         this.showEmptyState();
     }
+
+    // 📚 보유 상태 업데이트 (도서 표시 완료 후)
+if (window.bookStatusManager && window.bookStatusManager.isLoaded) {
+    setTimeout(() => {
+        this.updateCurrentBooksStatus();
+    }, 100);
 }
+}
+
 
 
     /**
@@ -2479,7 +2591,287 @@ async addApplication(applicationData) {
     }
 }
 
- }
+
+/**
+ * 현재 표시된 도서들의 보유 상태 업데이트
+ */
+updateCurrentBooksStatus() {
+    console.log('🔄 현재 표시된 도서들의 보유 상태 업데이트 중...');
+    
+    const bookCards = document.querySelectorAll('.book-card');
+    let updatedCount = 0;
+
+    bookCards.forEach(card => {
+        const isbn = card.dataset.isbn;
+        const titleElement = card.querySelector('h3, .book-title, [class*="title"]');
+        const title = titleElement ? titleElement.textContent.trim() : '';
+        
+        if (isbn || title) {
+            // BookStatusManager로 보유 여부 확인
+            if (window.bookStatusManager && window.bookStatusManager.isLoaded) {
+                const isOwned = window.bookStatusManager.isBookOwned({
+                    isbn13: isbn,
+                    isbn: isbn,
+                    title: title
+                });
+                
+                if (isOwned) {
+                    this.addOwnedStatus(card);
+                    updatedCount++;
+                }
+            }
+        }
+    });
+
+    console.log(`✅ ${updatedCount}개 도서의 보유 상태 업데이트 완료`);
+    // 🔧 보유중 도서의 버튼 상태 업데이트 (새로 추가)
+    this.updateOwnedBooksButtons();
+}
+
+/**
+ * 보유중 도서의 버튼을 "신청불가"로 업데이트
+ */
+updateOwnedBooksButtons() {
+    console.log('🔧 보유중 도서 버튼 상태 업데이트 시작...');
+    
+    const bookCards = document.querySelectorAll('.book-card');
+    let updatedButtonCount = 0;
+    
+    bookCards.forEach((card, index) => {
+        const overlay = card.querySelector('.status-overlay.owned, .status-overlay');
+        const button = card.querySelector('button');
+        
+        if (overlay && overlay.textContent.includes('보유중') && button) {
+            const title = card.querySelector('h3')?.textContent || '';
+            
+            console.log(`🔧 보유중 도서 ${index + 1} 버튼 업데이트: "${title}"`);
+            
+            // 버튼을 "신청불가"로 변경
+            button.innerHTML = '신청불가';
+            button.disabled = true;
+            button.style.cssText = `
+                background-color: #6b7280 !important;
+                border-color: #6b7280 !important;
+                color: white !important;
+                cursor: not-allowed !important;
+                opacity: 1 !important;
+            `;
+            
+            // 클릭 이벤트 차단
+            button.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (window.bookRequestSystem && window.bookRequestSystem.showNotification) {
+                    window.bookRequestSystem.showNotification('이미 학교에서 보유중인 도서입니다.', 'info');
+                } else {
+                    alert('이미 학교에서 보유중인 도서입니다.');
+                }
+                return false;
+            };
+            
+            updatedButtonCount++;
+            console.log(`✅ 버튼 업데이트 완료: "${button.textContent.trim()}"`);
+        }
+    });
+    
+    console.log(`🎉 보유중 도서 버튼 업데이트 완료: ${updatedButtonCount}개`);
+}
+
+/**
+ * 도서 카드에 보유중 오버레이 추가
+ */
+addOwnedStatus(bookCard) {
+    // 이미 보유중 상태가 있는지 확인
+    if (bookCard.querySelector('.status-overlay.owned')) {
+        return;
+    }
+
+    // 보유중 오버레이 생성
+    const ownedOverlay = document.createElement('div');
+    ownedOverlay.className = 'status-overlay owned';
+    ownedOverlay.textContent = '보유중';
+    ownedOverlay.style.cssText = `
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: #ef4444;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 10;
+        pointer-events: none;
+    `;
+    
+    // 카드가 relative position을 가지도록 설정
+    bookCard.style.position = 'relative';
+    
+    // 카드에 추가
+    bookCard.appendChild(ownedOverlay);
+    
+    // 카드 스타일 변경
+    bookCard.style.opacity = '0.8';
+    bookCard.style.backgroundColor = '#fef2f2';
+    bookCard.style.border = '1px solid #fecaca';
+}
+
+/**
+ * 모달에서 보유중 도서 처리
+ */
+setupModalObserver() {
+    console.log('🔍 모달 관찰자 설정 중...');
+    
+    // 모달 변화 감지
+    const modalObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                const modal = document.querySelector('#bookModal, .modal');
+                
+                // 모달이 열려있고 아직 처리되지 않았다면
+                if (modal && 
+                    modal.style.display !== 'none' && 
+                    !modal.classList.contains('hidden') &&
+                    !modal.querySelector('.owned-processed')) {
+                    
+                    setTimeout(() => {
+                        this.processOwnedBookModal(modal);
+                    }, 100);
+                }
+            }
+        });
+    });
+    
+    // 관찰 시작
+    modalObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+    });
+}
+
+/**
+ * 보유중 도서 모달 처리
+ */
+processOwnedBookModal(modal) {
+    console.log('🔍 모달 처리 시작');
+    
+    // 🔒 강력한 중복 처리 방지
+    if (modal.querySelector('.owned-processed')) {
+        console.log('⚠️ 이미 처리된 모달 - 처리 중단');
+        return;
+    }
+
+    // 중복 처리 방지 마킹
+    const processedMark = document.createElement('div');
+    processedMark.className = 'owned-processed';
+    processedMark.style.display = 'none';
+    modal.appendChild(processedMark);
+    
+    // 모달에서 도서 제목 추출
+    // 모달에서 ISBN 추출 (더 정확한 방식)
+let isbn = '';
+
+// 1. 버튼의 data-isbn 속성에서 찾기
+const requestBtn = modal.querySelector('[data-isbn]');
+if (requestBtn && requestBtn.dataset.isbn) {
+    isbn = requestBtn.dataset.isbn;
+    console.log('📖 ISBN 발견 (버튼):', isbn);
+}
+
+// 2. 다른 data 속성들에서 찾기
+if (!isbn) {
+    const elementsWithIsbn = modal.querySelectorAll('[data-isbn]');
+    for (const element of elementsWithIsbn) {
+        if (element.dataset.isbn) {
+            isbn = element.dataset.isbn;
+            console.log('📖 ISBN 발견 (요소):', isbn);
+            break;
+        }
+    }
+}
+
+if (!isbn) {
+    console.log('❌ 모달에서 ISBN을 찾을 수 없음');
+    return;
+}
+
+console.log('📖 모달 ISBN:', isbn);
+
+// 보유 여부 확인 (ISBN 기반)
+if (window.bookStatusManager && window.bookStatusManager.isLoaded) {
+    const isOwned = window.bookStatusManager.isBookOwned({ 
+        isbn: isbn, 
+        isbn13: isbn 
+    });
+    
+    if (isOwned) {
+        console.log('🔴 보유중인 도서 - 모달 UI 변경');
+        this.transformModalForOwnedBook(modal, isbn);
+    } else {
+        console.log('✅ 신청 가능한 도서');
+    }
+}
+}
+
+/**
+ * 보유중 도서 모달 UI 변경
+ */
+transformModalForOwnedBook(modal, isbn) {
+    console.log('🔧 보유중 도서 모달 UI 변경 (ISBN):', isbn);
+    
+    // 1. 모든 버튼 찾기 및 변경
+    const buttons = modal.querySelectorAll('button');
+    
+    buttons.forEach((btn, i) => {
+        // 신청하기 버튼 찾기 (더 정확한 방식)
+        if (btn.textContent.includes('신청하기') || 
+            btn.textContent.includes('신청') || 
+            btn.innerHTML.includes('신청하기')) {
+            
+            console.log(`🔧 버튼 ${i+1} 수정: "${btn.textContent}" → "신청불가"`);
+            
+            // 버튼 내용 완전 변경
+            btn.innerHTML = '🚫 신청불가';
+            btn.disabled = true;
+            btn.style.cssText = `
+                background-color: #9ca3af !important;
+                border-color: #9ca3af !important;
+                color: #6b7280 !important;
+                cursor: not-allowed !important;
+                opacity: 0.7 !important;
+            `;
+            
+            // 클릭 이벤트 차단
+            btn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (window.bookRequestSystem && window.bookRequestSystem.showNotification) {
+                    window.bookRequestSystem.showNotification('이미 학교에서 보유중인 도서입니다.', 'info');
+                } else {
+                    alert('이미 학교에서 보유중인 도서입니다.');
+                }
+                return false;
+            };
+            
+            console.log(`✅ 버튼 ${i+1} 수정 완료`);
+        }
+    });
+    
+    // 2. 제목 옆에 "보유중" 표시 추가
+    const titleElement = modal.querySelector('h1, h2, h3, .text-xl, .font-bold');
+    if (titleElement && !titleElement.querySelector('.owned-badge')) {
+        const ownedBadge = document.createElement('span');
+        ownedBadge.className = 'owned-badge';
+        ownedBadge.innerHTML = ' <span style="color: #ef4444; font-weight: 500; margin-left: 8px;">• 보유중</span>';
+        titleElement.appendChild(ownedBadge);
+        console.log('✅ 제목 옆 "보유중" 표시 추가');
+    }
+    
+    console.log('🎉 보유중 도서 모달 UI 변경 완료');}
+
+}
 
 
 

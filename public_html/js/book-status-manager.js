@@ -20,13 +20,14 @@ class BookStatusManager {
         try {
             console.log('📚 보유도서 목록 로드 시작...');
             
-            // 기존 API 엔드포인트 사용
-            const response = await fetch('/api/books/owned-books');
+            // 🔧 수정: 올바른 API 엔드포인트 사용
+            const response = await fetch('/api/books/owned');
             
             if (!response.ok) {
                 throw new Error(`API 호출 실패: ${response.status}`);
             }
             
+            // 🔧 수정: 응답 형식에 맞게 처리 (배열로 직접 반환)
             const ownedBooks = await response.json();
             console.log(`✅ 보유도서 ${ownedBooks.length}권 로드 완료`);
             
@@ -61,6 +62,7 @@ class BookStatusManager {
             this.loading = false;
         }
     }
+    
 
     /**
      * 텍스트 정규화 (검색 정확도 향상)
